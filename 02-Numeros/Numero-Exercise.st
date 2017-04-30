@@ -303,12 +303,12 @@ initalizeWith: aValue
 	self invalidNumberType.
 ! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'F C 4/25/2017 23:43:21'!
+!Entero methodsFor: 'arithmetic operations' stamp: 'F C 4/30/2017 11:56:32'!
 / aDivisor 
 	
 	(aDivisor isKindOf: self class) ifTrue: [ ^Fraccion with: self over: aDivisor ].
 	
-	(aDivisor isKindOf: Fraccion) ifTrue: [ ^Fraccion with: (aDivisor denominator) over: (aDivisor numerator * self) ].
+	(aDivisor isKindOf: Fraccion) ifTrue: [ ^Fraccion with: (aDivisor denominator * self) over: (aDivisor numerator) ].
 	
 	self invalidNumberType.! !
 
