@@ -137,111 +137,111 @@ test10CanNotTopWhenThereAreNoObjectsInTheStack
 ! !
 
 
-!classDefinition: #AbstractStackElement category: #'Stack-Exercise'!
-Object subclass: #AbstractStackElement
+!classDefinition: #AbstractStackeableElement category: #'Stack-Exercise'!
+Object subclass: #AbstractStackeableElement
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
 
-!AbstractStackElement methodsFor: 'testing' stamp: 'F C 5/6/2017 23:15:08'!
+!AbstractStackeableElement methodsFor: 'testing' stamp: 'F C 5/6/2017 23:15:08'!
 isEmpty
 
 	self subclassResponsibility.! !
 
-!AbstractStackElement methodsFor: 'testing' stamp: 'F C 5/6/2017 23:14:55'!
+!AbstractStackeableElement methodsFor: 'testing' stamp: 'F C 5/6/2017 23:14:55'!
 size
 	
 	self subclassResponsibility.! !
 
 
-!AbstractStackElement methodsFor: 'accessing' stamp: 'F C 5/6/2017 23:15:29'!
-underliyingElement
+!AbstractStackeableElement methodsFor: 'accessing' stamp: 'E P 5/9/2017 18:44:24'!
+base
 
 	self subclassResponsibility.! !
 
-!AbstractStackElement methodsFor: 'accessing' stamp: 'F C 5/6/2017 23:15:19'!
+!AbstractStackeableElement methodsFor: 'accessing' stamp: 'F C 5/6/2017 23:15:19'!
 value
 
 	self subclassResponsibility.! !
 
 
-!classDefinition: #NullStackElement category: #'Stack-Exercise'!
-AbstractStackElement subclass: #NullStackElement
+!classDefinition: #EmptyStackeableElement category: #'Stack-Exercise'!
+AbstractStackeableElement subclass: #EmptyStackeableElement
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
 
-!NullStackElement methodsFor: 'testing' stamp: 'F C 5/6/2017 22:37:39'!
+!EmptyStackeableElement methodsFor: 'testing' stamp: 'F C 5/6/2017 22:37:39'!
 isEmpty
 	
 	^true.! !
 
-!NullStackElement methodsFor: 'testing' stamp: 'F C 5/6/2017 23:07:58'!
+!EmptyStackeableElement methodsFor: 'testing' stamp: 'F C 5/6/2017 23:07:58'!
 size
 	
 	^0.! !
 
 
-!NullStackElement methodsFor: 'accessing' stamp: 'F C 5/6/2017 23:11:22'!
-underliyingElement
+!EmptyStackeableElement methodsFor: 'accessing' stamp: 'E P 5/9/2017 18:44:15'!
+base
 
 	^self error: (OOStack stackEmptyErrorDescription).
 
 	! !
 
-!NullStackElement methodsFor: 'accessing' stamp: 'F C 5/6/2017 23:10:38'!
+!EmptyStackeableElement methodsFor: 'accessing' stamp: 'F C 5/6/2017 23:10:38'!
 value
 	
 	^self error: (OOStack stackEmptyErrorDescription).! !
 
 
-!classDefinition: #StackElement category: #'Stack-Exercise'!
-AbstractStackElement subclass: #StackElement
-	instanceVariableNames: 'value underlyingElement'
+!classDefinition: #StackeableElement category: #'Stack-Exercise'!
+AbstractStackeableElement subclass: #StackeableElement
+	instanceVariableNames: 'value base'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
 
-!StackElement methodsFor: 'testing' stamp: 'F C 5/6/2017 22:42:26'!
+!StackeableElement methodsFor: 'testing' stamp: 'F C 5/6/2017 22:42:26'!
 isEmpty
 
 	^false.! !
 
-!StackElement methodsFor: 'testing' stamp: 'F C 5/6/2017 23:07:48'!
+!StackeableElement methodsFor: 'testing' stamp: 'E P 5/9/2017 18:42:57'!
 size
 	
-	^underlyingElement size + 1.! !
+	^base size + 1.! !
 
 
-!StackElement methodsFor: 'initialization' stamp: 'F C 5/6/2017 22:58:18'!
-initializeWith: anElement onTopOf: anotherElement
+!StackeableElement methodsFor: 'initialization' stamp: 'E P 5/9/2017 18:50:01'!
+initializeWith: anElement onTopOf: aStackeableElement
 
 	value _ anElement.
-	underlyingElement _ anotherElement.! !
+	base _ aStackeableElement.! !
 
 
-!StackElement methodsFor: 'accessing' stamp: 'F C 5/6/2017 23:01:23'!
-underliyingElement
+!StackeableElement methodsFor: 'accessing' stamp: 'E P 5/9/2017 18:43:46'!
+base
 	
-	^underlyingElement.! !
+	^base.! !
 
-!StackElement methodsFor: 'accessing' stamp: 'F C 5/6/2017 23:00:51'!
+!StackeableElement methodsFor: 'accessing' stamp: 'F C 5/6/2017 23:00:51'!
 value
 	
 	^value! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'StackElement class' category: #'Stack-Exercise'!
-StackElement class
+!classDefinition: 'StackeableElement class' category: #'Stack-Exercise'!
+StackeableElement class
 	instanceVariableNames: ''!
 
-!StackElement class methodsFor: 'as yet unclassified' stamp: 'F C 5/6/2017 22:57:47'!
-with: anElement onTopOf: anotherElement
+!StackeableElement class methodsFor: 'instance creation' stamp: 'E P 5/9/2017 18:46:20'!
+with: anElement onTopOf: aStackElement
 	
-	^self new initializeWith: anElement onTopOf: anotherElement.
+	^self new initializeWith: anElement onTopOf: aStackElement.
 	! !
 
 
@@ -263,25 +263,25 @@ size
 	^elements size.! !
 
 
-!OOStack methodsFor: 'initialization' stamp: 'F C 5/6/2017 22:11:29'!
+!OOStack methodsFor: 'initialization' stamp: 'E P 5/9/2017 18:49:06'!
 initialize
 
-	elements  _ NullStackElement new.! !
+	elements  _ EmptyStackeableElement new.! !
 
 
-!OOStack methodsFor: 'adding' stamp: 'F C 5/6/2017 23:03:09'!
+!OOStack methodsFor: 'adding' stamp: 'E P 5/9/2017 18:48:41'!
 push: anElement
 	
-	elements _ StackElement with: anElement onTopOf: elements.! !
+	elements _ StackeableElement with: anElement onTopOf: elements.! !
 
 
-!OOStack methodsFor: 'removing' stamp: 'F C 5/6/2017 23:02:15'!
+!OOStack methodsFor: 'removing' stamp: 'E P 5/9/2017 18:43:57'!
 pop
 
 	| top |
 	
 	top _ elements value.
-	elements _  elements underliyingElement.
+	elements _  elements base.
 	^top.
 	! !
 
