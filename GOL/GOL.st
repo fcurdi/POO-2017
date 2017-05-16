@@ -22,12 +22,12 @@ assert: aCell isDeadAfterOneGenerationOfAGameOfLifeWithLiveCells: aCollectionOfL
 	self assert: (aGameOfLife isDeadAt: aCell ).
 	! !
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'F C 5/14/2017 19:44:28'!
+!GOLTest methodsFor: 'as yet unclassified' stamp: 'E P 5/15/2017 19:55:12'!
 simulateOneGenerationOfAGameOfLifeWithLiveCells: aCollectionOfLiveCells withSize: aSize
 
 	| aGameOfLife |
 	
-	aGameOfLife _ GameOfLife withLiveCells: aCollectionOfLiveCells withSize: aSize.
+	aGameOfLife _ GameOfLife withLiveCells: aCollectionOfLiveCells withCorner: aSize.
 	aGameOfLife nextGeneration.
 	^aGameOfLife.
 	! !
@@ -95,22 +95,31 @@ test05DeadCellWithThreeAliveNeighboursResurects
 "
 	self assert: 1@1 isAliveAfterOneGenerationOfAGameOfLifeWithLiveCells: { 2@0. 1@0. 0@0 }  withSize: 3@3.! !
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'F C 5/14/2017 18:57:55'!
+!GOLTest methodsFor: 'as yet unclassified' stamp: 'E P 5/15/2017 19:55:19'!
 test06CreateAGameOfLifeWithACellOutsideBounds
 
-	self should: [ GameOfLife withLiveCells: { 2@0. 1@0. 1@4 } withSize: 3@3 ]
+	self should: [ GameOfLife withLiveCells: { 2@0. 1@0. 1@4 } withCorner: 3@3 ]
    		  raise: Error - MessageNotUnderstood 
 		  withExceptionDo: [ :anError | self assert: anError messageText equals: GameOfLife cellOutsideBoundsErrorDescription ].! !
+
+!GOLTest methodsFor: 'as yet unclassified' stamp: 'E P 5/15/2017 20:55:46'!
+test07CannotCreateAGameOfLifeWithCornerSmallerOrEqualThanZero
+
+	self should: [ GameOfLife withLiveCells: { 2@0. 1@0. 1@4 } withCorner: -1@4 ]
+   		  raise: Error - MessageNotUnderstood 
+		  withExceptionDo: [ :anError | self assert: anError messageText equals: GameOfLife negativeOrZeroCornerErrorDescription ].
+		
+! !
 
 
 !classDefinition: #GameOfLife category: #GOL!
 Object subclass: #GameOfLife
-	instanceVariableNames: 'aliveCells size'
+	instanceVariableNames: 'aliveCells size board'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'GOL'!
 
-!GameOfLife methodsFor: 'as yet unclassified' stamp: 'F C 5/14/2017 19:48:28'!
+!GameOfLife methodsFor: 'as yet unclassified' stamp: 'E P 5/15/2017 20:55:00'!
 deadCells
 	
 	| deadCells aCell |
@@ -118,8 +127,8 @@ deadCells
 	"se puede hacer mejor"
 	
 	deadCells _ OrderedCollection new.
-	0 to: size x do: [ :x |
-		0 to: size y do: [ :y |
+	0 to: board corner x do: [ :x |
+		0 to: board corner y do: [ :y |
 			aCell _ x@y.				
 			(self isDeadAt: aCell) ifTrue: [ 
 				deadCells add: aCell.
@@ -142,6 +151,11 @@ hasToSurvive: aCell
 	
 	^numberOfAliveNeighbours = 2 or:  [numberOfAliveNeighbours = 3].! !
 
+!GameOfLife methodsFor: 'as yet unclassified' stamp: 'E P 5/15/2017 21:11:50'!
+neighbours: aCell
+
+	^aCell eightNeighbors select: [ :aNeighbour | board containsPoint: aNeighbour ].! !
+
 !GameOfLife methodsFor: 'as yet unclassified' stamp: 'F C 5/14/2017 19:48:43'!
 nextGeneration
 	
@@ -149,10 +163,10 @@ nextGeneration
 	
 	aliveCells _ (aliveCells select: [ :aCell | self hasToSurvive: aCell ]) union: (self deadCells select: [ :aDeadCell | self hasToResurrect: aDeadCell ]).! !
 
-!GameOfLife methodsFor: 'as yet unclassified' stamp: 'F C 5/14/2017 18:58:39'!
+!GameOfLife methodsFor: 'as yet unclassified' stamp: 'E P 5/15/2017 21:18:07'!
 numberOfAliveNeighboursOf: aCell
 
-	^(aCell eightNeighbors intersection: aliveCells) size.! !
+	^((self neighbours: aCell) intersection: aliveCells) size.! !
 
 
 !GameOfLife methodsFor: 'initialization' stamp: 'F C 5/14/2017 19:39:15'!
@@ -160,6 +174,12 @@ initializeWith: aCollectionOfLiveCells withSize: aSize
 
 	size := aSize.
 	aliveCells := aCollectionOfLiveCells.! !
+
+!GameOfLife methodsFor: 'initialization' stamp: 'E P 5/15/2017 19:53:43'!
+initializeWithLiveCells: aCollectionOfLiveCells andBoard: aBoard
+
+	board _ aBoard.
+	aliveCells _ aCollectionOfLiveCells.! !
 
 
 !GameOfLife methodsFor: 'testing' stamp: 'F C 5/14/2017 19:01:57'!
@@ -178,16 +198,25 @@ isDeadAt: aCell
 GameOfLife class
 	instanceVariableNames: ''!
 
-!GameOfLife class methodsFor: 'instance creation' stamp: 'F C 5/14/2017 19:38:58'!
-withLiveCells: aCollectionOfLiveCells withSize: aPoint 
+!GameOfLife class methodsFor: 'instance creation' stamp: 'E P 5/15/2017 20:54:26'!
+withLiveCells: aCollectionOfLiveCells withCorner: aPoint
 	
+	| board |
 	
-	(aCollectionOfLiveCells allSatisfy: [ :aCell | aCell between: 0@0 and: aPoint ] ) ifFalse: [ self error: self cellOutsideBoundsErrorDescription].
+	board _ Rectangle origin: 0@0 corner: aPoint.
 	
-	^self new initializeWith: aCollectionOfLiveCells withSize: aPoint.! !
+	((aPoint x > 0) and: [aPoint y > 0]) ifFalse: [ self error: self negativeOrZeroCornerErrorDescription].
+	(aCollectionOfLiveCells allSatisfy: [ :aCell | board containsPoint: aCell ] ) ifFalse: [ self error: self cellOutsideBoundsErrorDescription].
+	
+	^self new initializeWithLiveCells: aCollectionOfLiveCells andBoard: board.! !
 
 
-!GameOfLife class methodsFor: 'error descriptions' stamp: 'F C 5/14/2017 18:58:22'!
+!GameOfLife class methodsFor: 'error descriptions' stamp: 'E P 5/15/2017 20:05:16'!
 cellOutsideBoundsErrorDescription
 
-	^'Celda fuera de rango'.! !
+	^'Cannot create gameOfLife instance with out of bound cells.'.! !
+
+!GameOfLife class methodsFor: 'error descriptions' stamp: 'E P 5/15/2017 20:54:23'!
+negativeOrZeroCornerErrorDescription
+
+	^'Cannot create gameOfLife board with corner that has negative or zero coordinates.'.! !
