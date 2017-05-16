@@ -5,104 +5,66 @@ TestCase subclass: #GOLTest
 	poolDictionaries: ''
 	category: 'GOL'!
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'F C 5/14/2017 19:44:19'!
-assert: aCell isAliveAfterOneGenerationOfAGameOfLifeWithLiveCells: aCollectionOfLiveCells withSize: aSize
+!GOLTest methodsFor: 'Testing' stamp: 'F C 5/15/2017 22:55:38'!
+assert: aCell isAliveAfterOneGenerationOfAGameOfLifeWithLiveCells: aCollectionOfLiveCells withCorner: aPoint
 	
 	| aGameOfLife |
 	
-	aGameOfLife  _ self simulateOneGenerationOfAGameOfLifeWithLiveCells: aCollectionOfLiveCells withSize: aSize.
+	aGameOfLife  _ self simulateOneGenerationOfAGameOfLifeWithLiveCells: aCollectionOfLiveCells withCorner: aPoint.
 	self assert: (aGameOfLife isAliveAt: aCell ).! !
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'F C 5/14/2017 19:44:24'!
-assert: aCell isDeadAfterOneGenerationOfAGameOfLifeWithLiveCells: aCollectionOfLiveCells withSize: aSize
+!GOLTest methodsFor: 'Testing' stamp: 'F C 5/15/2017 22:55:20'!
+assert: aCell isDeadAfterOneGenerationOfAGameOfLifeWithLiveCells: aCollectionOfLiveCells withCorner: aPoint
 
 	| aGameOfLife |
 	
-	aGameOfLife  _ self simulateOneGenerationOfAGameOfLifeWithLiveCells: aCollectionOfLiveCells withSize: aSize.
+	aGameOfLife  _ self simulateOneGenerationOfAGameOfLifeWithLiveCells: aCollectionOfLiveCells withCorner: aPoint.
 	self assert: (aGameOfLife isDeadAt: aCell ).
 	! !
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'E P 5/15/2017 19:55:12'!
-simulateOneGenerationOfAGameOfLifeWithLiveCells: aCollectionOfLiveCells withSize: aSize
+!GOLTest methodsFor: 'Testing' stamp: 'F C 5/15/2017 22:54:57'!
+simulateOneGenerationOfAGameOfLifeWithLiveCells: aCollectionOfLiveCells withCorner: aPoint
 
 	| aGameOfLife |
 	
-	aGameOfLife _ GameOfLife withLiveCells: aCollectionOfLiveCells withCorner: aSize.
+	aGameOfLife _ GameOfLife withLiveCells: aCollectionOfLiveCells withCorner: aPoint.
 	aGameOfLife nextGeneration.
 	^aGameOfLife.
 	! !
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'F C 5/14/2017 19:28:07'!
+!GOLTest methodsFor: 'Testing' stamp: 'F C 5/15/2017 22:54:04'!
 test01AliveCellWithLessThanTwoAliveNeighboursDies
-
-"
-	| gameOfLife |
 	
-	gameOfLife _ GameOfLife withLiveCells: { 1@1 }  withSize: 3@3.
-	gameOfLife nextGeneration.
-	
-	self assert: (gameOfLife isDeadAt: 1@1).
-"	
-	self assert: 1@1 isDeadAfterOneGenerationOfAGameOfLifeWithLiveCells: {1@1}  withSize: 3@3.! !
+	self assert: 1@1 isDeadAfterOneGenerationOfAGameOfLifeWithLiveCells: {1@1}  withCorner: 3@3.! !
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'F C 5/14/2017 19:28:52'!
+!GOLTest methodsFor: 'Testing' stamp: 'F C 5/15/2017 22:53:59'!
 test02AliveCellWithTwoAliveNeighboursStaysAlive
-"
-	| gameOfLife |
-	
-	gameOfLife _ GameOfLife withLiveCells: { 1@1. 2@0. 1@0. }  withSize: 3@3.
-	gameOfLife nextGeneration.
-	
-	self assert: (gameOfLife isAliveAt: 1@1).
-"
 
-	self assert: 1@1 isAliveAfterOneGenerationOfAGameOfLifeWithLiveCells: { 1@1. 2@0. 1@0. } withSize: 3@3.! !
+	self assert: 1@1 isAliveAfterOneGenerationOfAGameOfLifeWithLiveCells: { 1@1. 2@0. 1@0. } withCorner: 3@3.! !
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'F C 5/14/2017 19:30:14'!
+!GOLTest methodsFor: 'Testing' stamp: 'F C 5/15/2017 22:53:51'!
 test03AliveCellWithThreeAliveNeighboursStaysAlive
-"
-	| gameOfLife |
-	
-	gameOfLife _ GameOfLife withLiveCells: { 1@1. 2@0. 1@0. 1@2. }  withSize: 3@3.
-	gameOfLife nextGeneration.
-	
-	self assert: (gameOfLife isAliveAt: 1@1).
-"
 
-	self assert: 1@1 isAliveAfterOneGenerationOfAGameOfLifeWithLiveCells: { 1@1. 2@0. 1@0. 1@2. } withSize: 3@3.! !
+	self assert: 1@1 isAliveAfterOneGenerationOfAGameOfLifeWithLiveCells: { 1@1. 2@0. 1@0. 1@2. } withCorner: 3@3.! !
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'F C 5/14/2017 19:30:09'!
+!GOLTest methodsFor: 'Testing' stamp: 'F C 5/15/2017 22:53:42'!
 test04AliveCellWithMoreThanThreeAliveNeighboursDies
-"
-	| gameOfLife |
-	
-	gameOfLife _ GameOfLife withLiveCells: { 1@1. 2@0. 1@0. 1@2. 0@1 } withSize: 3@3.
-	gameOfLife nextGeneration.
-	
-	self assert: (gameOfLife isDeadAt: 1@1) 
-"
-	self assert: 1@1 isDeadAfterOneGenerationOfAGameOfLifeWithLiveCells: { 1@1. 2@0. 1@0. 1@2. 0@1 } withSize: 3@3.! !
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'F C 5/14/2017 19:31:05'!
+	self assert: 1@1 isDeadAfterOneGenerationOfAGameOfLifeWithLiveCells: { 1@1. 2@0. 1@0. 1@2. 0@1 } withCorner: 3@3.! !
+
+!GOLTest methodsFor: 'Testing' stamp: 'F C 5/15/2017 22:53:31'!
 test05DeadCellWithThreeAliveNeighboursResurects
-"
-	| gameOfLife |
-	
-	gameOfLife _ GameOfLife withLiveCells: { 2@0. 1@0. 0@0 } withSize: 3@3.
-	gameOfLife nextGeneration.
-	
-	self assert: (gameOfLife isAliveAt: 1@1).
-"
-	self assert: 1@1 isAliveAfterOneGenerationOfAGameOfLifeWithLiveCells: { 2@0. 1@0. 0@0 }  withSize: 3@3.! !
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'E P 5/15/2017 19:55:19'!
-test06CreateAGameOfLifeWithACellOutsideBounds
+	self assert: 1@1 isAliveAfterOneGenerationOfAGameOfLifeWithLiveCells: { 2@0. 1@0. 0@0 }  withCorner: 3@3.! !
+
+!GOLTest methodsFor: 'Testing' stamp: 'F C 5/15/2017 22:51:35'!
+test06CannotCreateAGameOfLifeWithACellOutsideBounds
 
 	self should: [ GameOfLife withLiveCells: { 2@0. 1@0. 1@4 } withCorner: 3@3 ]
    		  raise: Error - MessageNotUnderstood 
 		  withExceptionDo: [ :anError | self assert: anError messageText equals: GameOfLife cellOutsideBoundsErrorDescription ].! !
 
-!GOLTest methodsFor: 'as yet unclassified' stamp: 'E P 5/15/2017 20:55:46'!
+!GOLTest methodsFor: 'Testing' stamp: 'E P 5/15/2017 20:55:46'!
 test07CannotCreateAGameOfLifeWithCornerSmallerOrEqualThanZero
 
 	self should: [ GameOfLife withLiveCells: { 2@0. 1@0. 1@4 } withCorner: -1@4 ]
@@ -110,6 +72,11 @@ test07CannotCreateAGameOfLifeWithCornerSmallerOrEqualThanZero
 		  withExceptionDo: [ :anError | self assert: anError messageText equals: GameOfLife negativeOrZeroCornerErrorDescription ].
 		
 ! !
+
+!GOLTest methodsFor: 'Testing' stamp: 'F C 5/15/2017 23:09:50'!
+test08CellWithThreeNeighboursButOutsideBoundsIsNotAliveAfterNextGeneration
+
+	self assert: -1@1 isDeadAfterOneGenerationOfAGameOfLifeWithLiveCells: { 0@0. 0@1. 0@2 }  withCorner: 3@3.! !
 
 
 !classDefinition: #GameOfLife category: #GOL!
@@ -119,12 +86,48 @@ Object subclass: #GameOfLife
 	poolDictionaries: ''
 	category: 'GOL'!
 
-!GameOfLife methodsFor: 'as yet unclassified' stamp: 'E P 5/15/2017 20:55:00'!
+!GameOfLife methodsFor: 'as yet unclassified' stamp: 'F C 5/15/2017 22:38:47'!
+nextGeneration
+	
+	aliveCells _ (aliveCells select: [ :aCell | self hasToSurvive: aCell ]) union: (self deadCells select: [ :aDeadCell | self hasToResurrect: aDeadCell ]).! !
+
+
+!GameOfLife methodsFor: 'initialization' stamp: 'E P 5/15/2017 19:53:43'!
+initializeWithLiveCells: aCollectionOfLiveCells andBoard: aBoard
+
+	board _ aBoard.
+	aliveCells _ aCollectionOfLiveCells.! !
+
+
+!GameOfLife methodsFor: 'testing' stamp: 'F C 5/14/2017 18:45:51'!
+hasToResurrect: aCell
+
+	^(self numberOfAliveNeighboursOf: aCell) = 3.! !
+
+!GameOfLife methodsFor: 'testing' stamp: 'F C 5/15/2017 22:43:29'!
+hasToSurvive: aCell
+	
+	| numberOfAliveNeighbours |
+	
+	numberOfAliveNeighbours _ self numberOfAliveNeighboursOf: aCell.
+	
+	^numberOfAliveNeighbours = 2 or:  [numberOfAliveNeighbours = 3]. ! !
+
+!GameOfLife methodsFor: 'testing' stamp: 'F C 5/14/2017 19:01:57'!
+isAliveAt: aCell
+
+	^aliveCells includes: aCell.! !
+
+!GameOfLife methodsFor: 'testing' stamp: 'F C 5/14/2017 19:02:22'!
+isDeadAt: aCell
+
+	^(self isAliveAt: aCell) not.! !
+
+
+!GameOfLife methodsFor: 'accessing --private' stamp: 'F C 5/15/2017 22:37:09'!
 deadCells
 	
 	| deadCells aCell |
-	
-	"se puede hacer mejor"
 	
 	deadCells _ OrderedCollection new.
 	0 to: board corner x do: [ :x |
@@ -137,60 +140,15 @@ deadCells
 		].
 	^deadCells.! !
 
-!GameOfLife methodsFor: 'as yet unclassified' stamp: 'F C 5/14/2017 18:45:51'!
-hasToResurrect: aCell
-
-	^(self numberOfAliveNeighboursOf: aCell) = 3.! !
-
-!GameOfLife methodsFor: 'as yet unclassified' stamp: 'F C 5/14/2017 18:22:41'!
-hasToSurvive: aCell
-	
-	| numberOfAliveNeighbours |
-	
-	numberOfAliveNeighbours _ self numberOfAliveNeighboursOf: aCell.
-	
-	^numberOfAliveNeighbours = 2 or:  [numberOfAliveNeighbours = 3].! !
-
-!GameOfLife methodsFor: 'as yet unclassified' stamp: 'E P 5/15/2017 21:11:50'!
+!GameOfLife methodsFor: 'accessing --private' stamp: 'E P 5/15/2017 21:11:50'!
 neighbours: aCell
 
 	^aCell eightNeighbors select: [ :aNeighbour | board containsPoint: aNeighbour ].! !
 
-!GameOfLife methodsFor: 'as yet unclassified' stamp: 'F C 5/14/2017 19:48:43'!
-nextGeneration
-	
-	"se puede hacer mejor"
-	
-	aliveCells _ (aliveCells select: [ :aCell | self hasToSurvive: aCell ]) union: (self deadCells select: [ :aDeadCell | self hasToResurrect: aDeadCell ]).! !
-
-!GameOfLife methodsFor: 'as yet unclassified' stamp: 'E P 5/15/2017 21:18:07'!
+!GameOfLife methodsFor: 'accessing --private' stamp: 'E P 5/15/2017 21:18:07'!
 numberOfAliveNeighboursOf: aCell
 
 	^((self neighbours: aCell) intersection: aliveCells) size.! !
-
-
-!GameOfLife methodsFor: 'initialization' stamp: 'F C 5/14/2017 19:39:15'!
-initializeWith: aCollectionOfLiveCells withSize: aSize
-
-	size := aSize.
-	aliveCells := aCollectionOfLiveCells.! !
-
-!GameOfLife methodsFor: 'initialization' stamp: 'E P 5/15/2017 19:53:43'!
-initializeWithLiveCells: aCollectionOfLiveCells andBoard: aBoard
-
-	board _ aBoard.
-	aliveCells _ aCollectionOfLiveCells.! !
-
-
-!GameOfLife methodsFor: 'testing' stamp: 'F C 5/14/2017 19:01:57'!
-isAliveAt: aCell
-
-	^aliveCells includes: aCell.! !
-
-!GameOfLife methodsFor: 'testing' stamp: 'F C 5/14/2017 19:02:22'!
-isDeadAt: aCell
-
-	^(self isAliveAt: aCell) not.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
