@@ -86,10 +86,19 @@ Object subclass: #GameOfLife
 	poolDictionaries: ''
 	category: 'GOL'!
 
-!GameOfLife methodsFor: 'as yet unclassified' stamp: 'F C 5/15/2017 22:38:47'!
+!GameOfLife methodsFor: 'as yet unclassified' stamp: 'E P 5/15/2017 23:37:30'!
 nextGeneration
 	
-	aliveCells _ (aliveCells select: [ :aCell | self hasToSurvive: aCell ]) union: (self deadCells select: [ :aDeadCell | self hasToResurrect: aDeadCell ]).! !
+	| nextGenerationAliveCells aCell |
+	
+	nextGenerationAliveCells _ OrderedCollection new.
+	0 to: board corner x do: [ :x |
+		0 to: board corner y do: [ :y |
+			aCell _ x@y.				
+			((self hasToSurvive: aCell) or: [self hasToResurrect: aCell]) ifTrue: [ nextGenerationAliveCells add: aCell.]]
+	].
+	
+	aliveCells _ nextGenerationAliveCells.! !
 
 
 !GameOfLife methodsFor: 'initialization' stamp: 'E P 5/15/2017 19:53:43'!
@@ -123,22 +132,6 @@ isDeadAt: aCell
 
 	^(self isAliveAt: aCell) not.! !
 
-
-!GameOfLife methodsFor: 'accessing --private' stamp: 'F C 5/15/2017 22:37:09'!
-deadCells
-	
-	| deadCells aCell |
-	
-	deadCells _ OrderedCollection new.
-	0 to: board corner x do: [ :x |
-		0 to: board corner y do: [ :y |
-			aCell _ x@y.				
-			(self isDeadAt: aCell) ifTrue: [ 
-				deadCells add: aCell.
-				]
-			]
-		].
-	^deadCells.! !
 
 !GameOfLife methodsFor: 'accessing --private' stamp: 'E P 5/15/2017 21:11:50'!
 neighbours: aCell
