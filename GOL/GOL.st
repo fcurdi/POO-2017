@@ -81,12 +81,12 @@ test08CellWithThreeNeighboursButOutsideBoundsIsNotAliveAfterNextGeneration
 
 !classDefinition: #GameOfLife category: #GOL!
 Object subclass: #GameOfLife
-	instanceVariableNames: 'aliveCells size board'
+	instanceVariableNames: 'aliveCells board'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'GOL'!
 
-!GameOfLife methodsFor: 'as yet unclassified' stamp: 'E P 5/15/2017 23:37:30'!
+!GameOfLife methodsFor: 'as yet unclassified' stamp: 'E P 5/15/2017 23:47:15'!
 nextGeneration
 	
 	| nextGenerationAliveCells aCell |
@@ -98,7 +98,10 @@ nextGeneration
 			((self hasToSurvive: aCell) or: [self hasToResurrect: aCell]) ifTrue: [ nextGenerationAliveCells add: aCell.]]
 	].
 	
-	aliveCells _ nextGenerationAliveCells.! !
+	aliveCells _ nextGenerationAliveCells.
+	
+	"
+	aliveCells := board allIntegerPoints select: [((self hasToSurvive: aCell) or: [self hasToResurrect: aCell])]"! !
 
 
 !GameOfLife methodsFor: 'initialization' stamp: 'E P 5/15/2017 19:53:43'!
