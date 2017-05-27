@@ -179,6 +179,56 @@ test17
 	
 	self assert: unMetro = cienCentimetros.! !
 
+!DistanceTest methodsFor: 'as yet unclassified' stamp: 'F C 5/27/2017 18:39:47'!
+test18
+
+	| aMetro unMetro dosMetros tresMetros aDistanceInterval |
+	
+	aMetro _ Meter withRatio: 1.
+	unMetro _ Distance withQuantity: 1 andUnit: aMetro.
+	dosMetros _ Distance withQuantity: 2 andUnit: aMetro.
+	tresMetros _ Distance withQuantity: 3 andUnit: aMetro.
+	aDistanceInterval _ unMetro to: tresMetros.
+	
+	self assert: (aDistanceInterval at:1) = unMetro.
+	self assert: (aDistanceInterval at:2) = dosMetros .
+	self assert: (aDistanceInterval at:3) = tresMetros .
+	self assert: aDistanceInterval size = 3.! !
+
+!DistanceTest methodsFor: 'as yet unclassified' stamp: 'F C 5/27/2017 19:24:37'!
+test19
+
+	| aMetro aKilometer novecientosNoventiOchoMetros novecientosNoventiNueveMetros unKilometro aDistanceInterval unMetro|
+	
+	aMetro _ Meter withRatio: 1.
+	aKilometer _ Meter withRatio: 1000.
+	unMetro _ Distance withQuantity: 1 andUnit: aMetro.
+	novecientosNoventiOchoMetros _ Distance withQuantity: 998 andUnit: aMetro.
+	novecientosNoventiNueveMetros _ Distance withQuantity: 999 andUnit: aMetro.
+	unKilometro _ Distance withQuantity: 1 andUnit: aKilometer.	
+	aDistanceInterval _ novecientosNoventiOchoMetros to: unKilometro by: unMetro.
+	
+	self assert: (aDistanceInterval at:1) = novecientosNoventiOchoMetros.
+	self assert: (aDistanceInterval at:2) = novecientosNoventiNueveMetros.
+	self assert: (aDistanceInterval at:3) = unKilometro.
+	self assert: aDistanceInterval size = 3.! !
+
+!DistanceTest methodsFor: 'as yet unclassified' stamp: 'F C 5/27/2017 20:16:12'!
+test20
+
+	| aMetro aKilometer unKilometro unMetro totalDistance |
+	
+	aMetro _ Meter withRatio: 1.
+	aKilometer _ Meter withRatio: 1000.
+	unMetro _ Distance withQuantity: 1 andUnit: aMetro.
+	unKilometro _ Distance withQuantity: 1 andUnit: aKilometer.
+	totalDistance _ Distance withQuantity: 0 andUnit: aMetro.
+	unMetro to: unKilometro by: unMetro do: [ :aDistance | 
+		totalDistance _ totalDistance + aDistance.
+	].
+	
+	self assert: totalDistance = (Distance withQuantity: (1000*1001/2) andUnit: aMetro).! !
+
 
 !classDefinition: #Distance category: #'Distance-Solution'!
 Object subclass: #Distance
@@ -265,16 +315,31 @@ quantityInBaseUnit
 
 	^quantity * unit ratio.! !
 
-!Distance methodsFor: 'as yet unclassified' stamp: 'E P 5/24/2017 20:15:30'!
+!Distance methodsFor: 'as yet unclassified' stamp: 'F C 5/27/2017 20:19:51'!
 to: aDistance
 
-	| distanceCollection |
+	| distanceIncrement |
 	
-	distanceCollection _ OrderedCollection new.
-	(quantity to: aDistance quantity) do: [ :aNumber |
-		distanceCollection add: (Distance with: aNumber)
+	distanceIncrement _ Distance withQuantity: 1 andUnit: self unit.
+	^self to: aDistance by: distanceIncrement.! !
+
+!Distance methodsFor: 'as yet unclassified' stamp: 'F C 5/27/2017 20:19:43'!
+to: aDistance by: aDistanceIncrement 
+
+	| aDistanceCollection |
+	
+	aDistanceCollection _ OrderedCollection new.
+	self to: aDistance by: aDistanceIncrement do: [ :distance |
+		aDistanceCollection add: distance.
 	].
-	^distanceCollection.! !
+	^aDistanceCollection ! !
+
+!Distance methodsFor: 'as yet unclassified' stamp: 'F C 5/27/2017 20:21:21'!
+to: aDistance by: aDistanceIncrement do: aBlockClosure 
+	
+	^self quantityInBaseUnit to: aDistance quantityInBaseUnit by: aDistanceIncrement quantityInBaseUnit do: [ :aNumber |
+		aBlockClosure value: (Distance withQuantity: aNumber andUnit: self unit).
+	].! !
 
 !Distance methodsFor: 'as yet unclassified' stamp: 'E P 5/24/2017 20:02:27'!
 unit
