@@ -1,46 +1,47 @@
 !classDefinition: #DistanceTest category: #'Distance-Solution'!
 TestCase subclass: #DistanceTest
-	instanceVariableNames: ''
+	instanceVariableNames: 'oneMeter twoMeters threeMeters oneKilometer'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
 
-!DistanceTest methodsFor: 'testing' stamp: 'E P 5/29/2017 21:01:17'!
+!DistanceTest methodsFor: 'testing' stamp: 'F C 5/30/2017 00:02:08'!
+assertThatInterval: anInterval onlyContains: aCollection
+
+	1 to: aCollection size do: [ :index |
+		self assert: (anInterval at: index) = (aCollection at: index)
+	].
+
+	self assert: anInterval size = aCollection size.! !
+
+!DistanceTest methodsFor: 'testing' stamp: 'F C 5/29/2017 23:36:58'!
 test01ADistanceAddsWithAnotherDistanceCorrectly
-
-	| dosMetros unMetro |
-	unMetro _ Distance withQuantity: 1 andUnit: DistanceUnit meter.
-	dosMetros _ Distance withQuantity: 2 andUnit: DistanceUnit meter.
 	
-	self assert: unMetro + unMetro = dosMetros.! !
+	self assert: oneMeter + oneMeter = twoMeters.! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'E P 5/29/2017 21:01:38'!
-test02
+!DistanceTest methodsFor: 'testing' stamp: 'F C 5/30/2017 00:10:57'!
+test02ADistanceSubstractsWithAnotherDistanceCorrectly
 
-	| dosMetros unMetro |
-	unMetro _ Distance withQuantity: 1 andUnit: DistanceUnit meter.
-	dosMetros _ Distance withQuantity: 2 andUnit: DistanceUnit meter.
-	
-	self assert: dosMetros - unMetro = unMetro.! !
+	self assert: twoMeters - oneMeter = oneMeter.! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'E P 5/29/2017 21:01:48'!
+!DistanceTest methodsFor: 'testing' stamp: 'F C 5/29/2017 23:38:01'!
 test03AScalarMultipliesWithADistanceCorrectly
 
-	| dosMetros cuatroMetros |
-	dosMetros _ Distance withQuantity: 2 andUnit: DistanceUnit meter.
-	cuatroMetros _ Distance withQuantity: 4 andUnit: DistanceUnit meter.
+	| fourMeters |
 	
-	self assert: dosMetros * 2 = cuatroMetros.
-	self assert: 2* dosMetros = cuatroMetros.! !
+	fourMeters _ Distance withQuantity: 4 andUnit: DistanceUnit meter.
+	
+	self assert: twoMeters * 2 = fourMeters.
+	self assert: 2* twoMeters = fourMeters.! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'E P 5/29/2017 21:01:59'!
+!DistanceTest methodsFor: 'testing' stamp: 'F C 5/29/2017 23:39:14'!
 test04ADistanceDividesWithAScalarCorrectly
 
-	| medioMetro unMetro |
-	unMetro _ Distance withQuantity: 1 andUnit: DistanceUnit meter.
-	medioMetro _ Distance withQuantity: 0.5 andUnit: DistanceUnit meter.
+	| halfMeter |
+
+	halfMeter _ Distance withQuantity: 0.5 andUnit: DistanceUnit meter.
 	
-	self assert: unMetro / 2 = medioMetro.! !
+	self assert: oneMeter / 2 = halfMeter.! !
 
 !DistanceTest methodsFor: 'testing' stamp: 'E P 5/29/2017 21:02:05'!
 test05CannotCreateDistanceWithNegativeQuantity
@@ -49,125 +50,115 @@ test05CannotCreateDistanceWithNegativeQuantity
 	 	raise:  Error - MessageNotUnderstood 
 		withExceptionDo: [ :anError | self assert: anError messageText equals: Distance createDistanceWithNegativeQuantityErrorMessage].! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'E P 5/29/2017 21:02:20'!
+!DistanceTest methodsFor: 'testing' stamp: 'F C 5/29/2017 23:43:51'!
 test06CannotSubstractADistanceWithOneGreaterThanItself
-
-	| dosMetros tresMetros |
-	dosMetros _ Distance withQuantity: 2 andUnit: DistanceUnit meter.
-	tresMetros _ Distance withQuantity: 3 andUnit: DistanceUnit meter.
 	
-	self should: [dosMetros - tresMetros ] 
+	self should: [twoMeters - threeMeters ] 
 		 raise: Error - MessageNotUnderstood 
 		 withExceptionDo: [ :anError | self assert: anError messageText equals: Distance subtractingResultIsNegativeErrorMessage].
 
 	
 ! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'E P 5/29/2017 21:02:28'!
+!DistanceTest methodsFor: 'testing' stamp: 'F C 5/30/2017 00:32:11'!
 test07CannotMultiplyADistanceWithANegativeScalar
-
-	| unMetro |
-	unMetro _ Distance withQuantity: 1 andUnit: DistanceUnit meter.
 	
-	self should: [ unMetro * -6 ] 
+	self should: [ oneMeter * -6 ] 
 		 raise: Error - MessageNotUnderstood 
-		 withExceptionDo: [ :anError | self assert: anError messageText equals: Distance multiplyByNegativeScalarErrorDescription].
+		 withExceptionDo: [ :anError | self assert: anError messageText equals: Distance multiplyByNegativeScalarErrorMessage].
 			
-	self should: [ -6 * unMetro ] 
+	self should: [ -6 * oneMeter ] 
 		 raise: Error - MessageNotUnderstood 
-		 withExceptionDo: [ :anError | self assert: anError messageText equals: Distance multiplyByNegativeScalarErrorDescription].
+		 withExceptionDo: [ :anError | self assert: anError messageText equals: Distance multiplyByNegativeScalarErrorMessage].
 
 	! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'E P 5/29/2017 21:02:36'!
+!DistanceTest methodsFor: 'testing' stamp: 'F C 5/29/2017 23:39:48'!
 test08CannotDivideADistanceByANegativeScalar
 
-	| unMetro |
-	unMetro _ Distance withQuantity: 1 andUnit: DistanceUnit meter.
-	
-	self should: [ unMetro / -6 ] 
+	self should: [ oneMeter / -6 ] 
 		 raise: Error - MessageNotUnderstood 
 		 withExceptionDo: [ :anError | self assert: anError messageText equals: Distance divideByNegativeScalarErrorMessage ].
 
 	
 ! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'E P 5/29/2017 21:03:00'!
-test10DistancesCompareCorrectly
-
-	| dosMetros unMetro |
-	unMetro _ Distance withQuantity: 1 andUnit: DistanceUnit meter.
-	dosMetros _ Distance withQuantity: 2 andUnit: DistanceUnit meter.
+!DistanceTest methodsFor: 'testing' stamp: 'F C 5/30/2017 00:14:25'!
+test09DistancesCompareCorrectly
 	
-	self assert: unMetro < dosMetros.
-	self deny: unMetro > dosMetros.
-	self assert: unMetro <= unMetro.
-	self assert: dosMetros >= dosMetros.! !
+	self assert: oneMeter < twoMeters.
+	self deny: oneMeter  > twoMeters.
+	self assert: oneMeter  <= oneMeter.
+	self assert: twoMeters >= twoMeters.! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'E P 5/29/2017 21:52:44'!
+!DistanceTest methodsFor: 'testing' stamp: 'F C 5/30/2017 00:14:36'!
+test10
+
+	| aHundredCentimeters aThousandMilimeters |
+	
+	aHundredCentimeters _ Distance withQuantity: 100 andUnit: DistanceUnit centimeter.
+	aThousandMilimeters _ Distance withQuantity: 1000 andUnit: DistanceUnit millimeter .
+	
+	self assert: oneMeter = oneMeter.
+	self assert: oneMeter = aHundredCentimeters.
+	self assert: oneMeter = aThousandMilimeters .
+	self assert: (1000 * oneMeter) = oneKilometer.! !
+
+!DistanceTest methodsFor: 'testing' stamp: 'F C 5/30/2017 00:14:44'!
 test11
 
-	|   cienCentimetros unMetro milMilimetros unKilometro |
-	
-	unMetro _ Distance withQuantity: 1 andUnit: DistanceUnit meter.
-	cienCentimetros _ Distance withQuantity: 100 andUnit: DistanceUnit centimeter.
-	milMilimetros _ Distance withQuantity: 1000 andUnit: DistanceUnit millimeter .
-	unKilometro _ Distance withQuantity: 1 andUnit: DistanceUnit kilometer.
-	
-	self assert: unMetro = unMetro.
-	self assert: unMetro = cienCentimetros.
-	self assert: unMetro = milMilimetros .
-	self assert: (1000 * unMetro) = unKilometro.! !
+	| aDistanceInterval |
 
-!DistanceTest methodsFor: 'testing' stamp: 'E P 5/29/2017 21:53:10'!
+	aDistanceInterval _ oneMeter to: threeMeters.
+	
+	self assertThatInterval: aDistanceInterval onlyContains: {oneMeter . twoMeters . threeMeters .}.! !
+
+!DistanceTest methodsFor: 'testing' stamp: 'F C 5/30/2017 00:14:51'!
 test12
 
-	| unMetro dosMetros tresMetros aDistanceInterval |
+	| nineHundredNinetyEightMeters nineHundredNinetyNineMeters aDistanceInterval|
 	
-	unMetro _ Distance withQuantity: 1 andUnit: DistanceUnit meter.
-	dosMetros _ Distance withQuantity: 2 andUnit: DistanceUnit meter.
-	tresMetros _ Distance withQuantity: 3 andUnit: DistanceUnit meter.
-	aDistanceInterval _ unMetro to: tresMetros.
+	nineHundredNinetyEightMeters _ Distance withQuantity: 998 andUnit: DistanceUnit meter.
+	nineHundredNinetyNineMeters _ Distance withQuantity: 999 andUnit: DistanceUnit meter.
+	aDistanceInterval _ nineHundredNinetyEightMeters to: oneKilometer by: oneMeter.
 	
-	self assert: (aDistanceInterval at:1) = unMetro.
-	self assert: (aDistanceInterval at:2) = dosMetros .
-	self assert: (aDistanceInterval at:3) = tresMetros .
-	self assert: aDistanceInterval size = 3.! !
+	self assertThatInterval: aDistanceInterval onlyContains: {nineHundredNinetyEightMeters . nineHundredNinetyNineMeters . oneKilometer .}.! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'E P 5/29/2017 21:53:38'!
+!DistanceTest methodsFor: 'testing' stamp: 'F C 5/30/2017 00:14:58'!
 test13
 
-	| aMetro aKilometro novecientosNoventiOchoMetros novecientosNoventiNueveMetros unKilometro aDistanceInterval unMetro|
+	| totalDistance gaussSumDistance |
 	
-	aMetro _ DistanceUnit meter.
-	aKilometro _ DistanceUnit kilometer .
-	unMetro _ Distance withQuantity: 1 andUnit: aMetro.
-	novecientosNoventiOchoMetros _ Distance withQuantity: 998 andUnit: aMetro.
-	novecientosNoventiNueveMetros _ Distance withQuantity: 999 andUnit: aMetro.
-	unKilometro _ Distance withQuantity: 1 andUnit: aKilometro.	
-	aDistanceInterval _ novecientosNoventiOchoMetros to: unKilometro by: unMetro.
-	
-	self assert: (aDistanceInterval at:1) = novecientosNoventiOchoMetros.
-	self assert: (aDistanceInterval at:2) = novecientosNoventiNueveMetros.
-	self assert: (aDistanceInterval at:3) = unKilometro.
-	self assert: aDistanceInterval size = 3.! !
-
-!DistanceTest methodsFor: 'testing' stamp: 'E P 5/29/2017 21:05:53'!
-test14
-
-	| aMetro aKilometro unKilometro unMetro totalDistance gaussSumDistance |
-	
-	aMetro _ DistanceUnit meter.
-	aKilometro _ DistanceUnit kilometer.
-	unMetro _ Distance withQuantity: 1 andUnit: aMetro.
-	unKilometro _ Distance withQuantity: 1 andUnit: aKilometro.
-	totalDistance _ Distance withQuantity: 0 andUnit: aMetro.
-	unMetro to: unKilometro by: unMetro do: [ :aDistance | 
+	totalDistance _ Distance withQuantity: 0 andUnit: DistanceUnit meter.
+	oneMeter to: oneKilometer by: oneMeter do: [ :aDistance | 
 		totalDistance _ totalDistance + aDistance.
 	].
-	gaussSumDistance _ (Distance withQuantity: (1000*1001/2) andUnit: aMetro).
+	gaussSumDistance _ (Distance withQuantity: (1000*1001/2) andUnit: DistanceUnit meter).
 	
 	self assert: totalDistance = gaussSumDistance.! !
+
+!DistanceTest methodsFor: 'testing' stamp: 'F C 5/30/2017 00:30:43'!
+test14
+ 
+	oneMeter _ Distance withQuantity: 1 andUnit: DistanceUnit meter.
+ 	threeMeters _ Distance withQuantity: 3 andUnit: DistanceUnit meter.
+ 	
+ 	self should: [threeMeters to: oneMeter ] 
+ 		 raise: Error - MessageNotUnderstood 
+ 		 withExceptionDo: [ :anError | self assert: anError messageText equals: Distance cannotCreateNegativeIntervalErrorMessage].
+ ! !
+
+
+!DistanceTest methodsFor: 'setup' stamp: 'F C 5/29/2017 23:44:54'!
+setUp
+
+	| aDistanceFactory |
+	
+	aDistanceFactory _ DistanceFactory new.
+	oneMeter _ aDistanceFactory oneMeter.
+	twoMeters _ aDistanceFactory twoMeters.
+	threeMeters _ Distance withQuantity: 3 andUnit: DistanceUnit meter.
+	oneKilometer _ Distance withQuantity: 1 andUnit: DistanceUnit kilometer.! !
 
 
 !classDefinition: #Distance category: #'Distance-Solution'!
@@ -284,12 +275,20 @@ to: aDistance by: aDistanceIncrement
 	].
 	^aDistanceCollection.! !
 
-!Distance methodsFor: 'intervals' stamp: 'F C 5/27/2017 20:21:21'!
+!Distance methodsFor: 'intervals' stamp: 'F C 5/30/2017 00:29:55'!
 to: aDistance by: aDistanceIncrement do: aBlockClosure 
-	
-	^self quantityInBaseUnit to: aDistance quantityInBaseUnit by: aDistanceIncrement quantityInBaseUnit do: [ :aNumber |
-		aBlockClosure value: (Distance withQuantity: aNumber andUnit: self unit).
-	].! !
+
+	| start stop step |
+ 	
+ 	start _ self quantityInBaseUnit.
+ 	stop _  aDistance quantityInBaseUnit.
+ 	step _ aDistanceIncrement quantityInBaseUnit.
+ 	
+ 	stop < start ifTrue: [self error: Distance cannotCreateNegativeIntervalErrorMessage].
+ 	
+ 	^start to: stop by: step  do: [ :aNumber |
+  		aBlockClosure value: (Distance withQuantity: aNumber andUnit: self unit).
+  	].! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -297,20 +296,29 @@ to: aDistance by: aDistanceIncrement do: aBlockClosure
 Distance class
 	instanceVariableNames: ''!
 
-!Distance class methodsFor: 'error descriptions' stamp: 'E P 5/24/2017 20:03:41'!
+!Distance class methodsFor: 'error descriptions' stamp: 'F C 5/30/2017 00:26:22'!
+cannotCreateNegativeIntervalErrorMessage
+
+	^'Cannot create interval with a start distance greater than its stop distance'.! !
+
+!Distance class methodsFor: 'error descriptions' stamp: 'F C 5/30/2017 00:26:26'!
 createDistanceWithNegativeQuantityErrorMessage
+
 	^'Cannot create distances with negative quantities.'.! !
 
-!Distance class methodsFor: 'error descriptions' stamp: 'E P 5/24/2017 20:04:19'!
+!Distance class methodsFor: 'error descriptions' stamp: 'F C 5/30/2017 00:26:28'!
 divideByNegativeScalarErrorMessage
+
 	^'Cannot divide by a negative scalar.'! !
 
-!Distance class methodsFor: 'error descriptions' stamp: 'E P 5/23/2017 20:21:56'!
-multiplyByNegativeScalarErrorDescription
+!Distance class methodsFor: 'error descriptions' stamp: 'F C 5/30/2017 00:30:58'!
+multiplyByNegativeScalarErrorMessage
+
 	^'Cannot multiply by a negative scalar.'! !
 
-!Distance class methodsFor: 'error descriptions' stamp: 'E P 5/23/2017 20:24:52'!
+!Distance class methodsFor: 'error descriptions' stamp: 'F C 5/30/2017 00:26:33'!
 subtractingResultIsNegativeErrorMessage
+
 	^'Result of substraction must be positive.'.! !
 
 
@@ -371,12 +379,15 @@ Object subclass: #DistanceUnit
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
 
-!DistanceUnit methodsFor: 'as yet unclassified' stamp: 'E P 5/24/2017 18:57:20'!
+!DistanceUnit methodsFor: 'initialization' stamp: 'F C 5/30/2017 00:09:14'!
 initializeWithRatio: aRatio 
+
 	ratio _ aRatio.! !
 
-!DistanceUnit methodsFor: 'as yet unclassified' stamp: 'E P 5/24/2017 19:03:31'!
+
+!DistanceUnit methodsFor: 'accessing' stamp: 'F C 5/30/2017 00:09:17'!
 ratio
+
 	^ ratio.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
