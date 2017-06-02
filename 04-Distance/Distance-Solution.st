@@ -1,19 +1,19 @@
 !classDefinition: #Distance category: #'Distance-Solution'!
 Magnitude subclass: #Distance
-	instanceVariableNames: 'unit quantity'
+	instanceVariableNames: 'unit amount'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
 
-!Distance methodsFor: 'accessing' stamp: 'E P 5/24/2017 20:06:45'!
-quantity
+!Distance methodsFor: 'accessing' stamp: 'E P 5/31/2017 19:17:40'!
+amount
 
-	^quantity.! !
+	^amount.! !
 
-!Distance methodsFor: 'accessing' stamp: 'E P 5/24/2017 20:05:04'!
-quantityInBaseUnit 
+!Distance methodsFor: 'accessing' stamp: 'E P 6/1/2017 19:46:08'!
+amountInBaseUnit 
 
-	^quantity * unit ratio.! !
+	^amount * unit ratio.! !
 
 !Distance methodsFor: 'accessing' stamp: 'E P 5/24/2017 20:02:27'!
 unit
@@ -21,47 +21,56 @@ unit
 	^unit.! !
 
 
-!Distance methodsFor: 'arithmetic operations' stamp: 'E P 5/24/2017 20:08:08'!
+!Distance methodsFor: 'arithmetic operations' stamp: 'E P 5/31/2017 19:38:15'!
 * aNumber
 
-	aNumber negative ifTrue: [ self error: 'Cannot multiply by a negative scalar.'].
-	^Distance withQuantity: quantity * aNumber andUnit: unit.
+	^Distance withAmount: amount * aNumber andUnit: unit.
+	
 	! !
 
-!Distance methodsFor: 'arithmetic operations' stamp: 'E P 5/24/2017 20:05:18'!
+!Distance methodsFor: 'arithmetic operations' stamp: 'E P 6/1/2017 19:46:21'!
 + aDistance 
 	
 	| addingResultInBaseUnit |
 	
-	addingResultInBaseUnit _ self quantityInBaseUnit + aDistance quantityInBaseUnit.
-	^Distance withQuantity: (addingResultInBaseUnit / unit ratio) andUnit: unit.! !
+	addingResultInBaseUnit _ self amountInBaseUnit + aDistance amountInBaseUnit.
+	^Distance withAmount: (addingResultInBaseUnit / unit ratio) andUnit: unit.! !
 
-!Distance methodsFor: 'arithmetic operations' stamp: 'E P 5/24/2017 20:05:23'!
+!Distance methodsFor: 'arithmetic operations' stamp: 'E P 6/1/2017 19:46:26'!
 - aDistance 
 
 	| substractionResultInBaseUnit |
 	
-	substractionResultInBaseUnit  _ self quantityInBaseUnit - aDistance quantityInBaseUnit.
-	substractionResultInBaseUnit negative ifTrue: [self error: 'Result of substraction must be positive.'].
-	^Distance withQuantity: (substractionResultInBaseUnit / unit ratio) andUnit: unit.! !
+	substractionResultInBaseUnit  _ self amountInBaseUnit - aDistance amountInBaseUnit.
+	^Distance withAmount: (substractionResultInBaseUnit / unit ratio) andUnit: unit.! !
 
-!Distance methodsFor: 'arithmetic operations' stamp: 'E P 5/24/2017 20:08:11'!
+!Distance methodsFor: 'arithmetic operations' stamp: 'E P 5/31/2017 19:37:04'!
 / aNumber 
 
-	aNumber negative ifTrue: [self error: 'Cannot divide by a negative scalar.'].
-	^Distance withQuantity: (quantity / aNumber) andUnit: unit. ! !
+	^Distance withAmount: (amount / aNumber) andUnit: unit. ! !
+
+!Distance methodsFor: 'arithmetic operations' stamp: 'E P 5/31/2017 19:42:48'!
+negated
+	
+	^Distance withAmount: amount negated andUnit: unit.! !
 
 
-!Distance methodsFor: 'comparing' stamp: 'E P 5/24/2017 20:05:31'!
+!Distance methodsFor: 'comparing' stamp: 'E P 6/1/2017 19:46:31'!
 < aDistance 
 
-	^self quantityInBaseUnit < aDistance quantityInBaseUnit.! !
+	^self amountInBaseUnit < aDistance amountInBaseUnit.! !
 
-!Distance methodsFor: 'comparing' stamp: 'E P 5/24/2017 20:05:41'!
-= aDistance
+!Distance methodsFor: 'comparing' stamp: 'E P 6/1/2017 19:46:35'!
+= anObject
 
-	^self quantityInBaseUnit = aDistance quantityInBaseUnit.
+	^(anObject isKindOf: Distance) and: [ self amountInBaseUnit = anObject amountInBaseUnit ].
+	
 	! !
+
+!Distance methodsFor: 'comparing' stamp: 'E P 6/1/2017 19:46:44'!
+hash
+
+	^self amountInBaseUnit hash.! !
 
 
 !Distance methodsFor: 'converting' stamp: 'E P 5/24/2017 20:02:16'!
@@ -69,26 +78,26 @@ adaptToNumber: aNumber andSend: aSymbol
 
 	^self * aNumber.! !
 
-!Distance methodsFor: 'converting' stamp: 'E P 5/30/2017 18:31:55'!
+!Distance methodsFor: 'converting' stamp: 'E P 6/1/2017 19:46:41'!
 convertTo: anUnit
 	
-	^Distance withQuantity: (self quantityInBaseUnit * anUnit ratio) andUnit: anUnit.! !
+	^Distance withAmount: (self amountInBaseUnit / anUnit ratio) andUnit: anUnit.! !
 
 
-!Distance methodsFor: 'initialization' stamp: 'F C 5/28/2017 20:45:05'!
-initializeWithQuantity: aScalar andUnit: anUnit
+!Distance methodsFor: 'initialization' stamp: 'E P 5/31/2017 19:35:02'!
+initializeWithAmount: anAmount andUnit: anUnit
 
-	quantity _ aScalar.
+	amount _ anAmount.
 	unit _ anUnit.
 	! !
 
 
-!Distance methodsFor: 'intervals' stamp: 'E P 5/30/2017 14:12:25'!
+!Distance methodsFor: 'intervals' stamp: 'E P 5/31/2017 19:33:38'!
 to: aDistance
 
 	| distanceIncrement |
 	
-	distanceIncrement _ Distance withQuantity: 1 andUnit: unit.
+	distanceIncrement _ Distance withAmount: 1 andUnit: unit.
 	^self to: aDistance by: distanceIncrement.! !
 
 !Distance methodsFor: 'intervals' stamp: 'E P 5/30/2017 18:18:14'!
@@ -101,57 +110,49 @@ to: aDistance by: aDistanceIncrement do: aBlockClosure
 
 	(self to: aDistance by: aDistanceIncrement) do: aBlockClosure.! !
 
+
+!Distance methodsFor: 'printing' stamp: 'E P 5/31/2017 20:15:47'!
+printString
+
+	| distanceAsString |
+	distanceAsString _ amount printString, ' ', unit printString.
+	(amount > 1) 
+		ifTrue: [ ^distanceAsString, 's' ]
+		ifFalse: [ ^distanceAsString] .! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'Distance class' category: #'Distance-Solution'!
 Distance class
 	instanceVariableNames: ''!
 
-!Distance class methodsFor: 'error descriptions' stamp: 'F C 5/30/2017 00:26:26'!
-createDistanceWithNegativeQuantityErrorMessage
-
-	^'Cannot create distances with negative quantities.'.! !
-
-!Distance class methodsFor: 'error descriptions' stamp: 'F C 5/30/2017 00:26:28'!
-divideByNegativeScalarErrorMessage
-
-	^'Cannot divide by a negative scalar.'! !
-
-!Distance class methodsFor: 'error descriptions' stamp: 'F C 5/30/2017 00:30:58'!
-multiplyByNegativeScalarErrorMessage
-
-	^'Cannot multiply by a negative scalar.'! !
-
-!Distance class methodsFor: 'error descriptions' stamp: 'F C 5/30/2017 00:26:33'!
-subtractingResultIsNegativeErrorMessage
-
-	^'Result of substraction must be positive.'.! !
-
-
-!Distance class methodsFor: 'instance creation' stamp: 'E P 5/24/2017 20:03:53'!
-withQuantity: aScalar andUnit: anUnit
+!Distance class methodsFor: 'instance creation' stamp: 'E P 5/31/2017 19:32:14'!
+withAmount: anAmount andUnit: anUnit
 	
-	aScalar negative ifTrue: [self error: self createDistanceWithNegativeQuantityErrorMessage.].
-	^self new initializeWithQuantity: aScalar andUnit: anUnit.! !
+	^self new initializeWithAmount: anAmount andUnit: anUnit.! !
 
 
 !classDefinition: #DistanceInterval category: #'Distance-Solution'!
 Collection subclass: #DistanceInterval
-	instanceVariableNames: 'start stop step'
+	instanceVariableNames: 'from to by'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
 
-!DistanceInterval methodsFor: 'accessing' stamp: 'E P 5/30/2017 18:58:07'!
-at: anIndex
+!DistanceInterval methodsFor: 'accessing' stamp: 'E P 6/1/2017 19:32:16'!
+by
 
-	"Answer the anInteger'th element."
-	
-	
-	(anIndex = 1 or: [(start + step) < stop])
-		ifTrue: [
-			^start + (step * (anIndex-1))]
-		ifFalse: [self errorSubscriptBounds: anIndex].! !
+	^by.! !
+
+!DistanceInterval methodsFor: 'accessing' stamp: 'E P 6/1/2017 19:32:11'!
+from 
+
+	^from.! !
+
+!DistanceInterval methodsFor: 'accessing' stamp: 'E P 6/1/2017 19:32:24'!
+to
+
+	^to.! !
 
 
 !DistanceInterval methodsFor: 'adding' stamp: 'E P 5/30/2017 18:10:37'!
@@ -161,34 +162,39 @@ add: newObject
 	self shouldNotImplement! !
 
 
-!DistanceInterval methodsFor: 'enumerating' stamp: 'E P 5/30/2017 18:58:47'!
+!DistanceInterval methodsFor: 'enumerating' stamp: 'E P 6/1/2017 20:58:38'!
 do: aBlock 
-	"Evaluate aBlock with each of the receiver's elements as the argument."
 
-	1 to: self size do: [ :i |
-		aBlock value: (self at: i) ]		! !
+	0 to: (self size - 1) do: [ :i |
+		aBlock value: (from + (by * i))].! !
 
 
-!DistanceInterval methodsFor: 'initializing' stamp: 'E P 5/30/2017 18:46:59'!
+!DistanceInterval methodsFor: 'initializing' stamp: 'E P 6/1/2017 19:30:46'!
 initializeWithStart: startDistance stop: stopDistance andStep: aStepDistance
 
 	| smallerUnit |
 	
 	smallerUnit _ startDistance unit min: (stopDistance unit).
 	
-	start _ startDistance convertTo: smallerUnit.
-	stop _ stopDistance convertTo: smallerUnit.
-	step _ aStepDistance convertTo: smallerUnit.
+	from _ startDistance convertTo: smallerUnit.
+	to _ stopDistance convertTo: smallerUnit.
+	by _ aStepDistance convertTo: smallerUnit.
 	
 	! !
 
 
-!DistanceInterval methodsFor: 'testing' stamp: 'E P 5/30/2017 19:02:48'!
+!DistanceInterval methodsFor: 'testing' stamp: 'E P 6/1/2017 20:40:59'!
 size
+
+	^(((to - from) amount abs + 1) / (by amount abs)) ceiling.
 	
-	((start + step) < stop) 
-		ifTrue: [^(stop - start) quantity + 1]
-		ifFalse: [^1].! !
+! !
+
+
+!DistanceInterval methodsFor: 'printing' stamp: 'E P 6/1/2017 21:11:44'!
+printString
+
+	^'Interval (', from printString , ' to: ', to printString, ') by: ', by printString.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -196,34 +202,31 @@ size
 DistanceInterval class
 	instanceVariableNames: ''!
 
-!DistanceInterval class methodsFor: 'instance creation' stamp: 'E P 5/30/2017 18:59:50'!
+!DistanceInterval class methodsFor: 'instance creation' stamp: 'E P 6/1/2017 19:33:24'!
 withStart: startDistance stop: stopDistance andStep: aStepDistance
 
-	startDistance > stopDistance ifTrue: [self error: DistanceInterval cannotCreateNegativeIntervalErrorMessage].
 	^self new initializeWithStart: startDistance stop: stopDistance andStep: aStepDistance.
 
 
 	! !
 
 
-!DistanceInterval class methodsFor: 'error descriptions' stamp: 'E P 5/30/2017 18:19:13'!
-cannotCreateNegativeIntervalErrorMessage
-
-	^'Cannot create interval with a start distance greater than its stop distance'.! !
-
 
 !classDefinition: #DistanceTest category: #'Distance-Solution'!
 TestCase subclass: #DistanceTest
-	instanceVariableNames: 'oneMeter twoMeters threeMeters oneKilometer fourMeters halfMeter aHundredCentimeters aThousandMilimeters nineHundredNinetyEightMeters nineHundredNinetyNineMeters'
+	instanceVariableNames: 'oneMeter twoMeters threeMeters oneKilometer fourMeters halfMeter aHundredCentimeters aThousandMilimeters nineHundredNinetyEightMeters nineHundredNinetyNineMeters minusOneMeter'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
 
-!DistanceTest methodsFor: 'testing' stamp: 'E P 5/30/2017 00:56:28'!
+!DistanceTest methodsFor: 'testing' stamp: 'E P 6/1/2017 20:49:30'!
 assertThatInterval: anInterval onlyContains: anOrderedCollection
 
-	1 to: anOrderedCollection size do: [ :index |
-		self assert: (anInterval at: index) = (anOrderedCollection at: index)
+	| index |
+	index _ 1.
+	anInterval do: [ :aDistance |  
+		self assert: (anOrderedCollection at: index) = aDistance.
+		index _ index + 1.
 	].
 
 	self assert: anInterval size = anOrderedCollection size.! !
@@ -248,46 +251,6 @@ test03AScalarMultipliesWithADistanceCorrectly
 test04ADistanceDividesWithAScalarCorrectly
 	
 	self assert: oneMeter / 2 = halfMeter.! !
-
-!DistanceTest methodsFor: 'testing' stamp: 'E P 5/30/2017 00:46:57'!
-test05CannotCreateDistanceWithNegativeQuantity
-
-	self should: [ Distance withQuantity: -6 andUnit: DistanceUnit meter ]
-	 	raise:  Error - MessageNotUnderstood 
-		withExceptionDo: [ :anError | self assert: anError messageText equals: Distance createDistanceWithNegativeQuantityErrorMessage].! !
-
-!DistanceTest methodsFor: 'testing' stamp: 'E P 5/30/2017 00:45:24'!
-test06CannotSubstractADistanceWithOneGreaterThanItself
-	
-	self should: [ twoMeters - threeMeters ] 
-		 raise: Error - MessageNotUnderstood 
-		 withExceptionDo: [ :anError | self assert: anError messageText equals: Distance subtractingResultIsNegativeErrorMessage].
-
-	
-! !
-
-!DistanceTest methodsFor: 'testing' stamp: 'F C 5/30/2017 00:32:11'!
-test07CannotMultiplyADistanceWithANegativeScalar
-	
-	self should: [ oneMeter * -6 ] 
-		 raise: Error - MessageNotUnderstood 
-		 withExceptionDo: [ :anError | self assert: anError messageText equals: Distance multiplyByNegativeScalarErrorMessage].
-			
-	self should: [ -6 * oneMeter ] 
-		 raise: Error - MessageNotUnderstood 
-		 withExceptionDo: [ :anError | self assert: anError messageText equals: Distance multiplyByNegativeScalarErrorMessage].
-
-	! !
-
-!DistanceTest methodsFor: 'testing' stamp: 'F C 5/29/2017 23:39:48'!
-test08CannotDivideADistanceByANegativeScalar
-
-	self should: [ oneMeter / -6 ] 
-		 raise: Error - MessageNotUnderstood 
-		 withExceptionDo: [ :anError | self assert: anError messageText equals: Distance divideByNegativeScalarErrorMessage ].
-
-	
-! !
 
 !DistanceTest methodsFor: 'testing' stamp: 'E P 5/30/2017 01:11:20'!
 test09DistancesCompareCorrectlyTheirLength
@@ -323,26 +286,18 @@ test12CanPassADistanceAsStepAndTheStartAndStopOfTheIntervalCanHaveDifferentUnits
 	
 	self assertThatInterval: aDistanceInterval onlyContains: { nineHundredNinetyEightMeters . nineHundredNinetyNineMeters . oneKilometer . }.! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'E P 5/30/2017 01:23:14'!
+!DistanceTest methodsFor: 'testing' stamp: 'E P 5/31/2017 19:34:24'!
 test13AnIntervalCanBeCreatedWithAClosureAsCollaboratorAndTheClosureReceivesTheValuesOfTheInterval
 
 	| totalDistance gaussSumDistance |
 	
-	totalDistance _ Distance withQuantity: 0 andUnit: DistanceUnit meter.
+	totalDistance _ Distance withAmount: 0 andUnit: DistanceUnit meter.
 	oneMeter to: oneKilometer by: oneMeter do: [ :aDistance | 
 		totalDistance _ totalDistance + aDistance.
 	].
-	gaussSumDistance _ (Distance withQuantity: (1000*1001/2) andUnit: DistanceUnit meter).
+	gaussSumDistance _ (Distance withAmount: (1000*1001/2) andUnit: DistanceUnit meter).
 	
 	self assert: totalDistance = gaussSumDistance.! !
-
-!DistanceTest methodsFor: 'testing' stamp: 'E P 5/30/2017 18:18:59'!
-test14CannotCreateAnIntervalWithAGreaterStartThanItsStop
- 	
- 	self should: [ threeMeters to: oneMeter ] 
- 		 raise: Error - MessageNotUnderstood 
- 		 withExceptionDo: [ :anError | self assert: anError messageText equals: DistanceInterval cannotCreateNegativeIntervalErrorMessage].
- ! !
 
 !DistanceTest methodsFor: 'testing' stamp: 'E P 5/30/2017 01:32:16'!
 test15PassingAStepGreaterThanTheDifferenceBetweenTheStartAndStopReturnsAnIntervalWithOnlyTheFirstElement
@@ -352,23 +307,34 @@ test15PassingAStepGreaterThanTheDifferenceBetweenTheStartAndStopReturnsAnInterva
 	
 	self assertThatInterval: aDistanceInterval onlyContains: { oneMeter. }! !
 
+!DistanceTest methodsFor: 'testing' stamp: 'E P 5/31/2017 19:42:02'!
+test16NegatingADistanceShouldReturnTheSameDistanceButWithItsAmountNegated
+	
+	self assert: oneMeter negated = minusOneMeter .! !
 
-!DistanceTest methodsFor: 'setup' stamp: 'E P 5/30/2017 00:49:51'!
+!DistanceTest methodsFor: 'testing' stamp: 'E P 5/31/2017 19:43:27'!
+test17NegatingADistanceShouldBeReflective
+	
+	self assert: minusOneMeter negated negated = minusOneMeter .! !
+
+
+!DistanceTest methodsFor: 'setup' stamp: 'E P 5/31/2017 19:41:46'!
 setUp
 
 	| aDistanceFactory |
 	
 	aDistanceFactory _ DistanceFactory new.
+	minusOneMeter _ aDistanceFactory minusOneMeter.
 	oneMeter _ aDistanceFactory oneMeter.
 	twoMeters _ aDistanceFactory twoMeters.
-	threeMeters _ Distance withQuantity: 3 andUnit: DistanceUnit meter.
-	fourMeters _ Distance withQuantity: 4 andUnit: DistanceUnit meter.
-	halfMeter _ Distance withQuantity: 0.5 andUnit: DistanceUnit meter.
-	oneKilometer _ Distance withQuantity: 1 andUnit: DistanceUnit kilometer.
-	aHundredCentimeters _ Distance withQuantity: 100 andUnit: DistanceUnit centimeter.
-	aThousandMilimeters _ Distance withQuantity: 1000 andUnit: DistanceUnit millimeter .
-	nineHundredNinetyEightMeters _ Distance withQuantity: 998 andUnit: DistanceUnit meter.
-	nineHundredNinetyNineMeters _ Distance withQuantity: 999 andUnit: DistanceUnit meter.! !
+	threeMeters _ Distance withAmount: 3 andUnit: DistanceUnit meter.
+	fourMeters _ Distance withAmount: 4 andUnit: DistanceUnit meter.
+	halfMeter _ Distance withAmount: 0.5 andUnit: DistanceUnit meter.
+	oneKilometer _ Distance withAmount: 1 andUnit: DistanceUnit kilometer.
+	aHundredCentimeters _ Distance withAmount: 100 andUnit: DistanceUnit centimeter.
+	aThousandMilimeters _ Distance withAmount: 1000 andUnit: DistanceUnit millimeter .
+	nineHundredNinetyEightMeters _ Distance withAmount: 998 andUnit: DistanceUnit meter.
+	nineHundredNinetyNineMeters _ Distance withAmount: 999 andUnit: DistanceUnit meter.! !
 
 
 !classDefinition: #DistanceFactory category: #'Distance-Solution'!
@@ -378,53 +344,54 @@ Object subclass: #DistanceFactory
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
 
-!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 5/29/2017 21:00:03'!
+!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 5/31/2017 19:33:44'!
 minusOneMeter
 
-	^Distance withQuantity: -1 andUnit: DistanceUnit meter.! !
+	^Distance withAmount: -1 andUnit: DistanceUnit meter.! !
 
-!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 5/29/2017 21:00:15'!
+!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 5/31/2017 19:33:48'!
 oneCentimeter
 
-	^Distance withQuantity: 1 andUnit: DistanceUnit centimeter . ! !
+	^Distance withAmount: 1 andUnit: DistanceUnit centimeter . ! !
 
-!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 5/29/2017 21:00:27'!
+!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 5/31/2017 19:33:50'!
 oneHundredCentimeters
 
-	^Distance withQuantity: 100 andUnit: DistanceUnit centimeter.! !
+	^Distance withAmount: 100 andUnit: DistanceUnit centimeter.! !
 
-!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 5/29/2017 21:00:35'!
+!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 5/31/2017 19:33:53'!
 oneMeter
 
-	^Distance withQuantity: 1 andUnit: DistanceUnit meter.! !
+	^Distance withAmount: 1 andUnit: DistanceUnit meter.! !
 
-!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 5/29/2017 21:00:49'!
+!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 5/31/2017 19:33:57'!
 twoHundredCentimeters
 
-	^Distance withQuantity: 200 andUnit: DistanceUnit centimeter.! !
+	^Distance withAmount: 200 andUnit: DistanceUnit centimeter.! !
 
-!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 5/29/2017 21:00:59'!
+!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 5/31/2017 19:33:59'!
 twoMeters
 
-	^Distance withQuantity: 2 andUnit: DistanceUnit meter.! !
+	^Distance withAmount: 2 andUnit: DistanceUnit meter.! !
 
-!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 5/29/2017 21:01:04'!
+!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 5/31/2017 19:34:03'!
 zeroMeters
 
-	^Distance withQuantity: 0 andUnit: DistanceUnit meter.! !
+	^Distance withAmount: 0 andUnit: DistanceUnit meter.! !
 
 
 !classDefinition: #DistanceUnit category: #'Distance-Solution'!
 Object subclass: #DistanceUnit
-	instanceVariableNames: 'ratio'
+	instanceVariableNames: 'ratio name'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
 
-!DistanceUnit methodsFor: 'initialization' stamp: 'F C 5/30/2017 00:09:14'!
-initializeWithRatio: aRatio 
+!DistanceUnit methodsFor: 'initialization' stamp: 'E P 5/31/2017 20:05:41'!
+initializeWithRatio: aRatio andName: aName
 
-	ratio _ aRatio.! !
+	ratio _ aRatio.
+	name _ aName.! !
 
 
 !DistanceUnit methodsFor: 'accessing' stamp: 'F C 5/30/2017 00:09:17'!
@@ -432,6 +399,16 @@ ratio
 
 	^ ratio.! !
 
+
+!DistanceUnit methodsFor: 'comparing' stamp: 'E P 5/31/2017 19:45:00'!
+= anUnit
+
+	^self ratio = anUnit ratio.! !
+
+!DistanceUnit methodsFor: 'comparing' stamp: 'E P 6/1/2017 19:11:45'!
+hash
+
+	^ratio hash.! !
 
 !DistanceUnit methodsFor: 'comparing' stamp: 'E P 5/30/2017 18:35:43'!
 min: anUnit
@@ -441,43 +418,49 @@ min: anUnit
 	(self ratio < anUnit ratio) ifTrue: [^self] 
 								ifFalse: [^anUnit].! !
 
+
+!DistanceUnit methodsFor: 'printing' stamp: 'E P 5/31/2017 20:08:10'!
+printString
+
+	^name.! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'DistanceUnit class' category: #'Distance-Solution'!
 DistanceUnit class
 	instanceVariableNames: ''!
 
-!DistanceUnit class methodsFor: 'instance creation' stamp: 'E P 5/29/2017 20:57:27'!
+!DistanceUnit class methodsFor: 'instance creation' stamp: 'E P 5/31/2017 20:10:11'!
 centimeter
 	
-	^self new initializeWithRatio: 0.01.! !
+	^self new initializeWithRatio: (1/100) andName: 'centimeter'.! !
 
-!DistanceUnit class methodsFor: 'instance creation' stamp: 'E P 5/29/2017 20:58:48'!
+!DistanceUnit class methodsFor: 'instance creation' stamp: 'E P 5/31/2017 20:06:29'!
 decameter
 	
-	^self new initializeWithRatio: 10.! !
+	^self new initializeWithRatio: 10 andName: 'decameter'.! !
 
-!DistanceUnit class methodsFor: 'instance creation' stamp: 'E P 5/29/2017 20:57:21'!
+!DistanceUnit class methodsFor: 'instance creation' stamp: 'E P 5/31/2017 20:10:18'!
 decimeter
 	
-	^self new initializeWithRatio: 0.1.! !
+	^self new initializeWithRatio: (1/10) andName: 'decimeter'.! !
 
-!DistanceUnit class methodsFor: 'instance creation' stamp: 'E P 5/29/2017 20:58:55'!
+!DistanceUnit class methodsFor: 'instance creation' stamp: 'E P 5/31/2017 20:07:11'!
 hectometer
 	
-	^self new initializeWithRatio: 100.! !
+	^self new initializeWithRatio: 100 andName: 'hectometer'.! !
 
-!DistanceUnit class methodsFor: 'instance creation' stamp: 'E P 5/29/2017 21:10:09'!
+!DistanceUnit class methodsFor: 'instance creation' stamp: 'E P 5/31/2017 20:07:19'!
 kilometer
 	
-	^self new initializeWithRatio: 1000.! !
+	^self new initializeWithRatio: 1000 andName: 'kilometer'.! !
 
-!DistanceUnit class methodsFor: 'instance creation' stamp: 'E P 5/29/2017 20:57:09'!
+!DistanceUnit class methodsFor: 'instance creation' stamp: 'E P 5/31/2017 20:07:35'!
 meter
 	
-	^self new initializeWithRatio: 1.! !
+	^self new initializeWithRatio: 1 andName: 'meter'.! !
 
-!DistanceUnit class methodsFor: 'instance creation' stamp: 'E P 5/29/2017 20:58:30'!
+!DistanceUnit class methodsFor: 'instance creation' stamp: 'E P 5/31/2017 20:10:27'!
 millimeter
 	
-	^self new initializeWithRatio: 0.001.! !
+	^self new initializeWithRatio: (1/1000) andName: 'millimeter'.! !
