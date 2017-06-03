@@ -10,10 +10,10 @@ amount
 
 	^amount.! !
 
-!Distance methodsFor: 'accessing' stamp: 'E P 6/1/2017 19:46:08'!
-amountInBaseUnit 
+!Distance methodsFor: 'accessing' stamp: 'F C 6/3/2017 18:50:35'!
+amountInMeters
 
-	^amount * unit ratio.! !
+	^(self convertTo: DistanceUnit meter) amount.! !
 
 !Distance methodsFor: 'accessing' stamp: 'E P 5/24/2017 20:02:27'!
 unit
@@ -28,21 +28,21 @@ unit
 	
 	! !
 
-!Distance methodsFor: 'arithmetic operations' stamp: 'E P 6/1/2017 19:46:21'!
+!Distance methodsFor: 'arithmetic operations' stamp: 'F C 6/3/2017 18:49:22'!
 + aDistance 
 	
-	| addingResultInBaseUnit |
+	| addingResultIninMeters |
 	
-	addingResultInBaseUnit _ self amountInBaseUnit + aDistance amountInBaseUnit.
-	^Distance withAmount: (addingResultInBaseUnit / unit ratio) andUnit: unit.! !
+	addingResultIninMeters _ self amountInMeters + aDistance amountInMeters.
+	^Distance withAmount: (addingResultIninMeters / unit ratio) andUnit: unit.! !
 
-!Distance methodsFor: 'arithmetic operations' stamp: 'E P 6/1/2017 19:46:26'!
+!Distance methodsFor: 'arithmetic operations' stamp: 'F C 6/3/2017 18:49:41'!
 - aDistance 
 
-	| substractionResultInBaseUnit |
+	| substractionResultInMeters |
 	
-	substractionResultInBaseUnit  _ self amountInBaseUnit - aDistance amountInBaseUnit.
-	^Distance withAmount: (substractionResultInBaseUnit / unit ratio) andUnit: unit.! !
+	substractionResultInMeters  _ self amountInMeters - aDistance amountInMeters.
+	^Distance withAmount: (substractionResultInMeters / unit ratio) andUnit: unit.! !
 
 !Distance methodsFor: 'arithmetic operations' stamp: 'E P 5/31/2017 19:37:04'!
 / aNumber 
@@ -55,22 +55,22 @@ negated
 	^Distance withAmount: amount negated andUnit: unit.! !
 
 
-!Distance methodsFor: 'comparing' stamp: 'E P 6/1/2017 19:46:31'!
+!Distance methodsFor: 'comparing' stamp: 'F C 6/3/2017 18:49:56'!
 < aDistance 
 
-	^self amountInBaseUnit < aDistance amountInBaseUnit.! !
+	^self amountInMeters < aDistance amountInMeters.! !
 
-!Distance methodsFor: 'comparing' stamp: 'E P 6/1/2017 19:46:35'!
+!Distance methodsFor: 'comparing' stamp: 'F C 6/3/2017 18:50:04'!
 = anObject
 
-	^(anObject isKindOf: Distance) and: [ self amountInBaseUnit = anObject amountInBaseUnit ].
+	^(anObject isKindOf: Distance) and: [ self amountInMeters = anObject amountInMeters ].
 	
 	! !
 
-!Distance methodsFor: 'comparing' stamp: 'E P 6/1/2017 19:46:44'!
+!Distance methodsFor: 'comparing' stamp: 'F C 6/3/2017 18:50:48'!
 hash
 
-	^self amountInBaseUnit hash.! !
+	^self amountInMeters hash.! !
 
 
 !Distance methodsFor: 'converting' stamp: 'E P 5/24/2017 20:02:16'!
@@ -78,10 +78,10 @@ adaptToNumber: aNumber andSend: aSymbol
 
 	^self * aNumber.! !
 
-!Distance methodsFor: 'converting' stamp: 'E P 6/1/2017 19:46:41'!
+!Distance methodsFor: 'converting' stamp: 'F C 6/3/2017 18:51:33'!
 convertTo: anUnit
 	
-	^Distance withAmount: (self amountInBaseUnit / anUnit ratio) andUnit: anUnit.! !
+	^Distance withAmount: ((amount * unit ratio) / anUnit ratio) andUnit: anUnit.! !
 
 
 !Distance methodsFor: 'initialization' stamp: 'E P 5/31/2017 19:35:02'!
@@ -209,7 +209,6 @@ withStart: startDistance stop: stopDistance andStep: aStepDistance
 
 
 	! !
-
 
 
 !classDefinition: #DistanceTest category: #'Distance-Solution'!
