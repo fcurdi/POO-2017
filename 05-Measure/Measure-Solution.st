@@ -45,26 +45,39 @@ convertTo: anUnit
 	
 	! !
 
-!ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/4/2017 15:59:47'!
+!ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/5/2017 20:57:24'!
 + aMeasure
 	
-	| addingResultInBaseUnit |
+	^aMeasure addConcreteMeasure: self.
 	
-	addingResultInBaseUnit _ self amountInBaseUnit + aMeasure amountInBaseUnit.
-	^self class withAmount: (addingResultInBaseUnit / unit ratio) andUnit: unit.! !
+! !
 
-!ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/4/2017 16:06:23'!
+!ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/5/2017 22:37:56'!
 - aMeasure 
 
-	| substractionResultInBaseUnit |
-	
-	substractionResultInBaseUnit  _ self amountInBaseUnit - aMeasure amountInBaseUnit.
-	^self class withAmount: (substractionResultInBaseUnit / unit ratio) andUnit: unit.! !
+	^self + aMeasure negated.! !
 
 !ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/4/2017 16:06:53'!
 / aNumber 
 
 	^self class withAmount: (amount / aNumber) andUnit: unit. ! !
+
+!ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/5/2017 21:48:57'!
+addCompoundMeasure: aCompoundMeasure 
+	
+	^aCompoundMeasure addConcreteMeasure: self.! !
+
+!ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/5/2017 20:56:30'!
+addConcreteMeasure: aConcreteMeasure 
+		
+	 | addingResultInBaseUnit |	
+	
+	(aConcreteMeasure unit isKindOf: self unit class) ifTrue: [
+		addingResultInBaseUnit _ self amountInBaseUnit + aConcreteMeasure amountInBaseUnit.
+		^self class withAmount: (addingResultInBaseUnit / unit ratio) andUnit: unit.
+	] ifFalse: [
+		^CompoundMeasure with: self with: aConcreteMeasure.
+	]! !
 
 !ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/4/2017 16:19:41'!
 hash
@@ -443,23 +456,49 @@ TestCase subclass: #MeasureTest
 	poolDictionaries: ''
 	category: 'Measure-Solution'!
 
-!MeasureTest methodsFor: 'testing' stamp: 'E P 6/4/2017 18:53:38'!
+!MeasureTest methodsFor: 'testing' stamp: 'F C 6/5/2017 22:22:01'!
+atest04
+	
+	| aMeter aSecond aMeterBySecond aVelocity |
+	
+	aMeter _ DistanceUnit meter.
+	aSecond _ TimeUnit second.
+	
+	aMeterBySecond _ aMeter / aSecond.
+	
+	aVelocity _ Measure withAmount: 10 andUnit: aMeterBySecond.
+	
+	self assert: aVelocity amount = 10.
+	self assert: aVelocity unit = aMeterBySecond.
+	
+	"
+	TODO LIST:
+	0. Tests
+	1 .Ver que hacer con Unit(compound/simple vs unit solo), Evaluar la posiblidad de hacerlo desde Measure (mas simple, sin jerarquias de unit).
+	2 .nullValues en msj de creacion de instancia de unit (revisar nombre tmb)
+	3 .revisar que metodos son genericos y pasarlos a Measure	
+	4. hacer la factory
+	5. tirar error al intentar convertir a unidades de otro tipo
+	6. 10 pesos + 5 litros
+	7. no puede haber kelvins negativos ( 2 K - 3K)	"! !
+
+!MeasureTest methodsFor: 'testing' stamp: 'F C 6/5/2017 20:36:35'!
 test01
 
 	| aMeter aPeso |
 	
 	aMeter _ ConcreteMeasure withAmount: 1 andUnit: DistanceUnit meter.
-	aPeso _ ConcreteMeasure withAmount: 1 andUnit: CurrencyUnit peso.
+	aPeso _ ConcreteMeasure withAmount: 1 andUnit: ArgentinianCurrencyUnit peso.
 	
 	self deny: aMeter = aPeso.! !
 
-!MeasureTest methodsFor: 'testing' stamp: 'F C 6/4/2017 19:14:03'!
+!MeasureTest methodsFor: 'testing' stamp: 'F C 6/5/2017 20:36:29'!
 test02
 
 	|  absoluteZero zeroCelsius zeroKelvin zeroMeters zeroPesos |
 	
 	zeroMeters _ Measure withAmount: 0 andUnit: DistanceUnit centimeter.
-	zeroPesos _ Measure withAmount: 0 andUnit: CurrencyUnit dollar.
+	zeroPesos _ Measure withAmount: 0 andUnit: USCurrencyUnit dollar.
 	zeroCelsius _ Measure withAmount: 0 andUnit: TemperatureUnit celsius. 
 	absoluteZero _ Measure withAmount: -273 andUnit: TemperatureUnit celsius. 
 	zeroKelvin _ Measure withAmount: 0 andUnit: TemperatureUnit kelvin. 
@@ -488,31 +527,191 @@ test03
 	
 	! !
 
-!MeasureTest methodsFor: 'testing' stamp: 'E P 6/4/2017 20:53:45'!
+!MeasureTest methodsFor: 'testing' stamp: 'F C 6/5/2017 20:56:50'!
 test04
+
+	| peso dollar aDollar aPeso aCompoundMeasure euro |
 	
-	| aMeter aSecond aMeterBySecond aVelocity |
+	peso _ ArgentinianCurrencyUnit peso.
+	dollar _ USCurrencyUnit dollar.
+	euro _ EuropeanCurrencyUnit euro.
+	aDollar _ Measure withAmount: 1 andUnit: dollar.
+	aPeso _ Measure withAmount: 1 andUnit: peso.
+	aCompoundMeasure _ aPeso + aDollar.
 	
-	aMeter _ DistanceUnit meter.
-	aSecond _ TimeUnit second.
+	self assert: (aCompoundMeasure amountFor: peso) = 1.
+	self assert: (aCompoundMeasure amountFor: dollar) = 1.
+	self assert: (aCompoundMeasure amountFor: euro) = 0.
 	
-	aMeterBySecond _ aMeter / aSecond.
+	! !
+
+!MeasureTest methodsFor: 'testing' stamp: 'F C 6/5/2017 23:08:53'!
+test05
+
+	| peso dollar aDollar aPeso  anEuro euro |
 	
-	aVelocity _ Measure withAmount: 10 andUnit: aMeterBySecond.
+	peso _ ArgentinianCurrencyUnit peso.
+	dollar _ USCurrencyUnit dollar.
+	euro _ EuropeanCurrencyUnit euro.
+	aDollar _ Measure withAmount: 1 andUnit: dollar.
+	aPeso _ Measure withAmount: 1 andUnit: peso.
+	anEuro _ Measure withAmount: 1 andUnit: euro.
 	
-	self assert: aVelocity amount = 10.
-	self assert: aVelocity unit = aMeterBySecond.
+	self assert: ((aPeso + aDollar) + anEuro isKindOf: CompoundMeasure).
+	self assert: ((aPeso + aDollar) + anEuro amountFor: euro) = 1.
+	self assert: ((anEuro + (aPeso + aDollar)) = ((aPeso + aDollar) + anEuro)).
+
 	
-	"
-	TODO LIST:
-	0. Tests
-	1 .Ver que hacer con Unit(compound/simple vs unit solo), Evaluar la posiblidad de hacerlo desde Measure (mas simple, sin jerarquias de unit).
-	2 .nullValues en msj de creacion de instancia de unit (revisar nombre tmb)
-	3 .revisar que metodos son genericos y pasarlos a Measure	
-	4. hacer la factory
-	5. tirar error al intentar convertir a unidades de otro tipo
-	6. 10 pesos + 5 litros
-	"! !
+	! !
+
+!MeasureTest methodsFor: 'testing' stamp: 'F C 6/5/2017 22:24:30'!
+test06
+
+	| peso dollar aDollar aPeso  anEuro euro minusOnePeso |
+	
+	peso _ ArgentinianCurrencyUnit peso.
+	dollar _ USCurrencyUnit dollar.
+	euro _ EuropeanCurrencyUnit euro.
+	aDollar _ Measure withAmount: 1 andUnit: dollar.
+	aPeso _ Measure withAmount: 1 andUnit: peso.
+	minusOnePeso _ aPeso negated.
+	anEuro _ Measure withAmount: 1 andUnit: euro.
+	
+	self assert: ((aPeso + aDollar) + (minusOnePeso + anEuro) isKindOf: CompoundMeasure).
+	self assert: ((aPeso + aDollar) + (minusOnePeso + anEuro) amountFor: euro) = 1.	
+	self assert: ((aPeso + aDollar) + (minusOnePeso + anEuro) amountFor: peso) = 0.		
+	self assert: ((aPeso + aDollar) + (minusOnePeso + anEuro) amountFor: dollar) = 1.	! !
+
+!MeasureTest methodsFor: 'testing' stamp: 'F C 6/5/2017 22:44:49'!
+test07
+
+	| peso dollar aDollar aPeso  |
+	
+	peso _ ArgentinianCurrencyUnit peso.
+	dollar _ USCurrencyUnit dollar.
+	aDollar _ Measure withAmount: 1 andUnit: dollar.
+	aPeso _ Measure withAmount: 1 andUnit: peso.
+
+	self assert: ((aPeso + aDollar) negated isKindOf: CompoundMeasure).
+	self assert: ((aPeso + aDollar) negated amountFor: peso) = -1.	
+	self assert: ((aPeso + aDollar) negated amountFor: dollar) = -1.! !
+
+!MeasureTest methodsFor: 'testing' stamp: 'F C 6/5/2017 22:55:59'!
+test08
+
+	| peso dollar aDollar aPeso  anEuro euro |
+	
+	peso _ ArgentinianCurrencyUnit peso.
+	dollar _ USCurrencyUnit dollar.
+	euro _ EuropeanCurrencyUnit euro.
+	aDollar _ Measure withAmount: 1 andUnit: dollar.
+	aPeso _ Measure withAmount: 1 andUnit: peso.
+	anEuro _ Measure withAmount: 1 andUnit: euro.
+
+	self assert: ((aPeso - aDollar) isKindOf: CompoundMeasure).
+	self assert: ((aPeso - aDollar) amountFor: peso) = 1.	
+	self assert: ((aPeso - aDollar) amountFor: dollar) = -1.
+	
+	self assert: (((aPeso - aDollar) - anEuro) isKindOf: CompoundMeasure).
+	self assert: (((aPeso - aDollar) - anEuro) amountFor: peso) = 1.
+	self assert: (((aPeso - aDollar) - anEuro) amountFor: aDollar) = -1.
+	self assert: (((aPeso - aDollar) - anEuro) amountFor: anEuro) = -1.
+	
+	self assert: ((aPeso - aDollar) - anEuro) = (anEuro negated + (aPeso - aDollar)).
+	! !
+
+
+!classDefinition: #CompoundMeasure category: #'Measure-Solution'!
+Object subclass: #CompoundMeasure
+	instanceVariableNames: 'container'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Measure-Solution'!
+
+!CompoundMeasure methodsFor: 'initialization' stamp: 'F C 6/5/2017 21:24:44'!
+initializeWith: aConcreteMeasure with: anotherConcreteMeasure
+	
+	container _ Dictionary new.
+	container at: aConcreteMeasure unit put: aConcreteMeasure amount.
+	container at: anotherConcreteMeasure unit put: anotherConcreteMeasure amount.! !
+
+
+!CompoundMeasure methodsFor: 'accessing' stamp: 'F C 6/5/2017 21:59:57'!
+amountFor: anUnit
+	
+	^container at: anUnit ifAbsent: [ ^anUnit nullValue ].
+	! !
+
+
+!CompoundMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/5/2017 21:44:08'!
++ anObject
+
+	^anObject addCompoundMeasure: self.
+
+	! !
+
+!CompoundMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/5/2017 23:13:02'!
+= anObject
+
+	(anObject isKindOf: CompoundMeasure) and: [
+			self allSatisfy: [ :aMeasure |
+					 (aMeasure amount = (anObject amountFor: aMeasure unit)) and: [
+								self numberOfDifferentMeasures = anObject numberOfDifferentMeasures.
+						]			
+				]
+		].
+
+	! !
+
+!CompoundMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/5/2017 22:29:09'!
+addCompoundMeasure: aCompoundMeasure 
+
+	aCompoundMeasure do: [ :aMeasure |
+		self + aMeasure.
+	].! !
+
+!CompoundMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/5/2017 23:06:19'!
+addConcreteMeasure: aConcreteMeasure 
+	
+	| previousAmount |
+	previousAmount _ self amountFor: aConcreteMeasure unit.
+	((previousAmount + aConcreteMeasure amount) = aConcreteMeasure unit nullValue) ifFalse: [
+		container at: aConcreteMeasure unit put: (previousAmount + aConcreteMeasure amount)
+	].! !
+
+!CompoundMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/5/2017 22:46:53'!
+negated
+
+	self do: [ :aMeasure |
+		container at: aMeasure unit put: aMeasure amount negated.
+	].! !
+
+
+!CompoundMeasure methodsFor: 'enumeration' stamp: 'F C 6/5/2017 22:34:44'!
+do: aBlockClosure 
+
+	container keysAndValuesDo: [ :key :value |
+		aBlockClosure value: (Measure withAmount: value andUnit: key).
+	].! !
+
+
+!CompoundMeasure methodsFor: 'testing' stamp: 'F C 6/5/2017 23:04:18'!
+numberOfDifferentMeasures
+
+	^container size.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'CompoundMeasure class' category: #'Measure-Solution'!
+CompoundMeasure class
+	instanceVariableNames: ''!
+
+!CompoundMeasure class methodsFor: 'instance creation' stamp: 'F C 6/5/2017 21:23:15'!
+with: aConcreteMeasure with: anotherConcreteMeasure 
+	
+	^self new initializeWith: aConcreteMeasure with: anotherConcreteMeasure.
+	
+	! !
 
 
 !classDefinition: #DistanceFactory category: #'Measure-Solution'!
@@ -558,24 +757,25 @@ zeroMeters
 	^ConcreteMeasure withAmount: 0 andUnit: DistanceUnit meter.! !
 
 
-!classDefinition: #SimpleUnit category: #'Measure-Solution'!
-Object subclass: #SimpleUnit
+!classDefinition: #Unit category: #'Measure-Solution'!
+Object subclass: #Unit
 	instanceVariableNames: 'ratio name nullValue'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Measure-Solution'!
 
-!SimpleUnit methodsFor: 'comparing' stamp: 'F C 6/4/2017 16:53:19'!
+!Unit methodsFor: 'comparing' stamp: 'F C 6/4/2017 16:53:19'!
 = anUnit
 
 	^self ratio = anUnit ratio.! !
 
-!SimpleUnit methodsFor: 'comparing' stamp: 'F C 6/4/2017 16:53:39'!
+!Unit methodsFor: 'comparing' stamp: 'F C 6/5/2017 21:35:44'!
 hash
 
-	^ratio hash.! !
+	"Mejorar la forma de hashear"
+	^ratio hash + self class name hash.! !
 
-!SimpleUnit methodsFor: 'comparing' stamp: 'F C 6/4/2017 16:55:02'!
+!Unit methodsFor: 'comparing' stamp: 'F C 6/4/2017 16:55:02'!
 min: anUnit
 
 	"Returns the unit with the smaller ratio".
@@ -584,7 +784,7 @@ min: anUnit
 								ifFalse: [^anUnit].! !
 
 
-!SimpleUnit methodsFor: 'initialization' stamp: 'E P 6/4/2017 18:43:21'!
+!Unit methodsFor: 'initialization' stamp: 'E P 6/4/2017 18:43:21'!
 initializeWithRatio: aRatio name: aName andNullValue: aNullValue
 
 	ratio _ aRatio.
@@ -592,83 +792,71 @@ initializeWithRatio: aRatio name: aName andNullValue: aNullValue
 	nullValue _ aNullValue.! !
 
 
-!SimpleUnit methodsFor: 'printing' stamp: 'E P 6/4/2017 18:16:44'!
+!Unit methodsFor: 'printing' stamp: 'E P 6/4/2017 18:16:44'!
 nullValue
 
 	^nullValue.! !
 
-!SimpleUnit methodsFor: 'printing' stamp: 'F C 6/4/2017 16:55:21'!
+!Unit methodsFor: 'printing' stamp: 'F C 6/4/2017 16:55:21'!
 printString
 
 	^name.! !
 
 
-!SimpleUnit methodsFor: 'accessing' stamp: 'F C 6/4/2017 16:55:49'!
+!Unit methodsFor: 'accessing' stamp: 'F C 6/4/2017 16:55:49'!
 ratio
 
 	^ ratio.! !
 
 
-!SimpleUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/4/2017 19:43:46'!
+!Unit methodsFor: 'arithmetic operations' stamp: 'E P 6/4/2017 19:43:46'!
 * aNumber
 
 	^Measure withAmount: aNumber andUnit: self.! !
 
-!SimpleUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/4/2017 19:45:54'!
+!Unit methodsFor: 'arithmetic operations' stamp: 'E P 6/4/2017 19:45:54'!
 adaptToNumber: aNumber andSend: aSymbol 
 
 	^self * aNumber.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'SimpleUnit class' category: #'Measure-Solution'!
-SimpleUnit class
+!classDefinition: 'Unit class' category: #'Measure-Solution'!
+Unit class
 	instanceVariableNames: ''!
 
-!SimpleUnit class methodsFor: 'instance creation' stamp: 'F C 6/4/2017 16:57:33'!
+!Unit class methodsFor: 'instance creation' stamp: 'F C 6/4/2017 16:57:33'!
 baseUnit
 
 	self subclassResponsibility.! !
 
 
-!classDefinition: #CurrencyUnit category: #'Measure-Solution'!
-SimpleUnit subclass: #CurrencyUnit
+!classDefinition: #ArgentinianCurrencyUnit category: #'Measure-Solution'!
+Unit subclass: #ArgentinianCurrencyUnit
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Measure-Solution'!
 
-!CurrencyUnit methodsFor: 'initialization' stamp: 'E P 6/4/2017 18:21:17'!
-initializeWithRatio: aRatio andName: aName
-
-	nullValue _ 0.
-	ratio _ aRatio.
-	name _ aName.! !
-
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'CurrencyUnit class' category: #'Measure-Solution'!
-CurrencyUnit class
+!classDefinition: 'ArgentinianCurrencyUnit class' category: #'Measure-Solution'!
+ArgentinianCurrencyUnit class
 	instanceVariableNames: ''!
 
-!CurrencyUnit class methodsFor: 'instance creation' stamp: 'F C 6/4/2017 17:11:00'!
+!ArgentinianCurrencyUnit class methodsFor: 'instance creation' stamp: 'F C 6/5/2017 20:35:01'!
 baseUnit
-	
+
 	^self peso.! !
 
-!CurrencyUnit class methodsFor: 'instance creation' stamp: 'E P 6/4/2017 18:36:08'!
-dollar
-	
-	^self new initializeWithRatio: 16 name: 'dollar' andNullValue: 0.! !
-
-!CurrencyUnit class methodsFor: 'instance creation' stamp: 'E P 6/4/2017 18:36:17'!
+!ArgentinianCurrencyUnit class methodsFor: 'instance creation' stamp: 'F C 6/5/2017 20:28:46'!
 peso
 	
 	^self new initializeWithRatio: 1 name: 'peso argentino' andNullValue: 0.! !
 
 
 !classDefinition: #DistanceUnit category: #'Measure-Solution'!
-SimpleUnit subclass: #DistanceUnit
+Unit subclass: #DistanceUnit
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -721,8 +909,32 @@ millimeter
 	^self new initializeWithRatio: (1/1000) name: 'millimeter' andNullValue: 0.! !
 
 
+!classDefinition: #EuropeanCurrencyUnit category: #'Measure-Solution'!
+Unit subclass: #EuropeanCurrencyUnit
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Measure-Solution'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'EuropeanCurrencyUnit class' category: #'Measure-Solution'!
+EuropeanCurrencyUnit class
+	instanceVariableNames: ''!
+
+!EuropeanCurrencyUnit class methodsFor: 'instance creation' stamp: 'F C 6/5/2017 20:35:13'!
+baseUnit
+
+	^self euro.! !
+
+!EuropeanCurrencyUnit class methodsFor: 'instance creation' stamp: 'F C 6/5/2017 20:33:21'!
+euro
+
+	^self new initializeWithRatio: 1 name: 'euro' andNullValue: 0.! !
+
+
 !classDefinition: #TemperatureUnit category: #'Measure-Solution'!
-SimpleUnit subclass: #TemperatureUnit
+Unit subclass: #TemperatureUnit
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -756,7 +968,7 @@ kelvin
 
 
 !classDefinition: #TimeUnit category: #'Measure-Solution'!
-SimpleUnit subclass: #TimeUnit
+Unit subclass: #TimeUnit
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -792,3 +1004,27 @@ minute
 second
 
 	^ self new initializeWithRatio: 1 name: 'second' andNullValue: 0.! !
+
+
+!classDefinition: #USCurrencyUnit category: #'Measure-Solution'!
+Unit subclass: #USCurrencyUnit
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Measure-Solution'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'USCurrencyUnit class' category: #'Measure-Solution'!
+USCurrencyUnit class
+	instanceVariableNames: ''!
+
+!USCurrencyUnit class methodsFor: 'instance creation' stamp: 'F C 6/5/2017 20:35:21'!
+baseUnit
+
+	^self dollar.! !
+
+!USCurrencyUnit class methodsFor: 'instance creation' stamp: 'F C 6/5/2017 20:29:41'!
+dollar
+	
+	^self new initializeWithRatio: 16 name: 'dollar' andNullValue: 0.! !
