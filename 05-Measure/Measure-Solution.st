@@ -482,9 +482,11 @@ TestCase subclass: #MeasureTest
 	poolDictionaries: ''
 	category: 'Measure-Solution'!
 
-!MeasureTest methodsFor: 'testing' stamp: 'F C 6/7/2017 00:39:40'!
+!MeasureTest methodsFor: 'testing' stamp: 'F C 6/7/2017 00:49:05'!
 TODO
 	"
+	-La resta esta a medias: En concrete measure en el '-' hay que doubleDispatchear. Y para eso hay que implementar 
+		el substractConcreteMeasure en ConcreteMeasure y el substractCompoundMeasure en CompoundMeasure.
 	-renombrar la variable de instancia 'container'
 	-revisar jerarquias
 	- .nullValues en msj de creacion de instancia de unit (revisar nombre tmb)
