@@ -79,7 +79,7 @@ addCompoundMeasure: aCompoundMeasure
 	
 	^aCompoundMeasure addConcreteMeasure: self.! !
 
-!ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/5/2017 20:56:30'!
+!ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/6/2017 23:50:16'!
 addConcreteMeasure: aConcreteMeasure 
 		
 	 | addingResultInBaseUnit |	
@@ -88,7 +88,7 @@ addConcreteMeasure: aConcreteMeasure
 		addingResultInBaseUnit _ self amountInBaseUnit + aConcreteMeasure amountInBaseUnit.
 		^self class withAmount: (addingResultInBaseUnit / unit ratio) andUnit: unit.
 	] ifFalse: [
-		^CompoundMeasure with: self with: aConcreteMeasure.
+		^CompoundMeasure with: { self.  aConcreteMeasure. }.
 	]! !
 
 !ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/4/2017 16:19:41'!
@@ -106,6 +106,11 @@ initializeWithAmount: anAmount andUnit: anUnit
 negated
 	
 	^self class withAmount: amount negated andUnit: unit.! !
+
+!ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/7/2017 00:12:24'!
+substractCompoundMeasure: aCompoundMeasure 
+
+	^aCompoundMeasure substractConcreteMeasure: self.! !
 
 
 !ConcreteMeasure methodsFor: 'comparing' stamp: 'F C 6/4/2017 16:12:28'!
@@ -217,6 +222,11 @@ initializeWithUnit: anUnit
 amountInBaseUnit
 	
 	^self unit nullValue.! !
+
+!NullMeasure methodsFor: 'converting' stamp: 'F C 6/7/2017 00:05:26'!
+convertTo: anUnit
+
+	^NullMeasure withUnit: anUnit.! !
 
 
 !NullMeasure methodsFor: 'accessing' stamp: 'E P 6/4/2017 19:25:46'!
@@ -467,17 +477,14 @@ setUp
 
 !classDefinition: #MeasureTest category: #'Measure-Solution'!
 TestCase subclass: #MeasureTest
-	instanceVariableNames: ''
+	instanceVariableNames: 'aMeter aPeso zeroMeters zeroPesos zeroCelsius absoluteZero zeroKelvin peso dollar euro aDollar zeroEuros meter anEuro minusOnePeso minusOneDollar minusOneEuro'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Measure-Solution'!
 
-!MeasureTest methodsFor: 'testing' stamp: 'F C 6/6/2017 23:35:00'!
+!MeasureTest methodsFor: 'testing' stamp: 'F C 6/7/2017 00:39:40'!
 TODO
 	"
-	-compund measure tiene que ser inmutable
-	-sacar ifs
-	-resta de compound measures
 	-renombrar la variable de instancia 'container'
 	-revisar jerarquias
 	- .nullValues en msj de creacion de instancia de unit (revisar nombre tmb)
@@ -487,30 +494,16 @@ TODO
 	-Unidades compuestas: 50 metros/(segundo*segundo)
 	-multiplcar y dividir measures con measures  y lo mismo entre measures y unidades
 	-nombrar tests y categorias
-	-setUp de las cosas usadas en los tests asi quedan mas claros.
 	"
 	! !
 
-!MeasureTest methodsFor: 'testing' stamp: 'F C 6/6/2017 22:41:28'!
+!MeasureTest methodsFor: 'testing' stamp: 'F C 6/7/2017 00:29:42'!
 test01
-
-	| aMeter aPeso |
-	
-	aMeter _ Measure withAmount: 1 andUnit: DistanceUnit meter.
-	aPeso _ Measure withAmount: 1 andUnit: ArgentinianCurrencyUnit peso.
 	
 	self deny: aMeter = aPeso.! !
 
-!MeasureTest methodsFor: 'testing' stamp: 'F C 6/6/2017 22:43:09'!
+!MeasureTest methodsFor: 'testing' stamp: 'F C 6/7/2017 00:30:41'!
 test02
-
-	|  absoluteZero zeroCelsius zeroKelvin zeroMeters zeroPesos |
-	
-	zeroMeters _ Measure withAmount: 0 andUnit: DistanceUnit centimeter.
-	zeroPesos _ Measure withAmount: 0 andUnit: USCurrencyUnit dollar.
-	zeroCelsius _ Measure withAmount: 0 andUnit: TemperatureUnit celsius. 
-	absoluteZero _ Measure withAmount: -273 andUnit: TemperatureUnit celsius. 
-	zeroKelvin _ Measure withAmount: 0 andUnit: TemperatureUnit kelvin. 
 	
 	self assert: zeroMeters = zeroPesos.
 	self deny:   zeroMeters = zeroCelsius.
@@ -520,13 +513,12 @@ test02
 	
 	! !
 
-!MeasureTest methodsFor: 'testing' stamp: 'F C 6/6/2017 22:43:31'!
+!MeasureTest methodsFor: 'testing' stamp: 'F C 6/7/2017 00:34:07'!
 test03
 	
-	| tenMeters aMeter |
+	| tenMeters  |
 	
-	aMeter _ DistanceUnit meter.
-	tenMeters _ Measure withAmount: 10 andUnit: aMeter.
+	tenMeters _ Measure withAmount: 10 andUnit: meter.
 	
 	self assert: tenMeters = (10 * aMeter).
 	self assert: tenMeters = (aMeter * 10).
@@ -535,17 +527,11 @@ test03
 	
 	! !
 
-!MeasureTest methodsFor: 'testing' stamp: 'E P 6/6/2017 21:13:13'!
+!MeasureTest methodsFor: 'testing' stamp: 'F C 6/7/2017 00:32:52'!
 test04
 
-	| peso dollar aDollar aPeso aCompoundMeasure euro zeroEuros |
+	| aCompoundMeasure |
 	
-	peso _ ArgentinianCurrencyUnit peso.
-	dollar _ USCurrencyUnit dollar.
-	euro _ EuropeanCurrencyUnit euro.
-	aDollar _ Measure withAmount: 1 andUnit: dollar.
-	aPeso _ Measure withAmount: 1 andUnit: peso.
-	zeroEuros _ Measure withAmount: 0 andUnit: euro.
 	aCompoundMeasure _ aPeso + aDollar.
 	
 	self assert: (aCompoundMeasure measureFor: peso) = aPeso.
@@ -554,17 +540,11 @@ test04
 	
 	! !
 
-!MeasureTest methodsFor: 'testing' stamp: 'F C 6/6/2017 23:18:09'!
+!MeasureTest methodsFor: 'testing' stamp: 'F C 6/7/2017 00:34:39'!
 test05
 
-	| peso dollar aDollar aPeso  anEuro euro aPesoAndADollarPlusAnEuro anEuroPlusAPesoAndADollar |
+	|  aPesoAndADollarPlusAnEuro anEuroPlusAPesoAndADollar |
 	
-	peso _ ArgentinianCurrencyUnit peso.
-	dollar _ USCurrencyUnit dollar.
-	euro _ EuropeanCurrencyUnit euro.
-	aDollar _ Measure withAmount: 1 andUnit: dollar.
-	aPeso _ Measure withAmount: 1 andUnit: peso.
-	anEuro _ Measure withAmount: 1 andUnit: euro.
 	aPesoAndADollarPlusAnEuro _ (aPeso + aDollar) + anEuro.
 	anEuroPlusAPesoAndADollar _ anEuro + (aPeso + aDollar).
 	
@@ -575,57 +555,34 @@ test05
 	
 	! !
 
-!MeasureTest methodsFor: 'testing' stamp: 'F C 6/6/2017 23:19:25'!
+!MeasureTest methodsFor: 'testing' stamp: 'F C 6/7/2017 00:37:40'!
 test06
 
-	| peso dollar aDollar aPeso  anEuro euro minusOnePeso zeroPeso aPesoAndADollarPlusMinusOnePesoAndAnEuro |
+	|  aPesoAndADollarPlusMinusOnePesoAndAnEuro |
 	
-	peso _ ArgentinianCurrencyUnit peso.
-	dollar _ USCurrencyUnit dollar.
-	euro _ EuropeanCurrencyUnit euro.
-	aDollar _ Measure withAmount: 1 andUnit: dollar.
-	aPeso _ Measure withAmount: 1 andUnit: peso.
-	zeroPeso _ Measure withAmount: 0 andUnit: peso.
-	minusOnePeso _ aPeso negated.
-	anEuro _ Measure withAmount: 1 andUnit: euro.
-	
-	aPesoAndADollarPlusMinusOnePesoAndAnEuro _ (aPeso + aDollar) + (minusOnePeso + anEuro).
+	aPesoAndADollarPlusMinusOnePesoAndAnEuro _ (aPeso + aDollar) + ( minusOnePeso + anEuro).
 	
 	self assert: (aPesoAndADollarPlusMinusOnePesoAndAnEuro isKindOf: CompoundMeasure).
 	self assert: (aPesoAndADollarPlusMinusOnePesoAndAnEuro measureFor: euro) = anEuro.	
-	self assert: (aPesoAndADollarPlusMinusOnePesoAndAnEuro measureFor: peso) = zeroPeso.		
+	self assert: (aPesoAndADollarPlusMinusOnePesoAndAnEuro measureFor: peso) = zeroPesos.		
 	self assert: (aPesoAndADollarPlusMinusOnePesoAndAnEuro measureFor: dollar) = aDollar.! !
 
-!MeasureTest methodsFor: 'testing' stamp: 'F C 6/6/2017 23:23:25'!
+!MeasureTest methodsFor: 'testing' stamp: 'F C 6/7/2017 00:37:57'!
 test07
 
-	| peso dollar aDollar aPeso  minusOneDollar minusOnePeso aPesoAndADollar |
-	
-	peso _ ArgentinianCurrencyUnit peso.
-	dollar _ USCurrencyUnit dollar.
-	aDollar _ Measure withAmount: 1 andUnit: dollar.
-	aPeso _ Measure withAmount: 1 andUnit: peso.
-	minusOnePeso _ aPeso negated.
-	minusOneDollar _ aDollar negated.
+	| aPesoAndADollar |
+
 	aPesoAndADollar _ aPeso + aDollar.
 	
 	self assert: (aPesoAndADollar negated isKindOf: CompoundMeasure).
 	self assert: (aPesoAndADollar negated measureFor: peso) = minusOnePeso.	
 	self assert: (aPesoAndADollar negated measureFor: dollar) = minusOneDollar.! !
 
-!MeasureTest methodsFor: 'testing' stamp: 'F C 6/6/2017 23:31:39'!
+!MeasureTest methodsFor: 'testing' stamp: 'F C 6/7/2017 00:38:25'!
 test08
 
-	| peso dollar aDollar aPeso  anEuro euro aPesoAndMinusOneDollar aPesoAndMinusOneDollarMinusAnEuro minusOneDollar minusOneEuro minusOneEuroPlusAPesoAndMinusOneDollar |
+	| aPesoAndMinusOneDollar aPesoAndMinusOneDollarMinusAnEuro minusOneEuroPlusAPesoAndMinusOneDollar |
 	
-	peso _ ArgentinianCurrencyUnit peso.
-	dollar _ USCurrencyUnit dollar.
-	euro _ EuropeanCurrencyUnit euro.
-	aDollar _ Measure withAmount: 1 andUnit: dollar.
-	aPeso _ Measure withAmount: 1 andUnit: peso.
-	anEuro _ Measure withAmount: 1 andUnit: euro.
-	minusOneDollar _ aDollar negated.
-	minusOneEuro _ anEuro negated.
 	aPesoAndMinusOneDollar _ aPeso - aDollar.
 	aPesoAndMinusOneDollarMinusAnEuro _ (aPeso - aDollar) - anEuro.
 	minusOneEuroPlusAPesoAndMinusOneDollar _ minusOneEuro + aPesoAndMinusOneDollar.
@@ -636,33 +593,56 @@ test08
 	
 	self assert: (aPesoAndMinusOneDollarMinusAnEuro isKindOf: CompoundMeasure).
 	self assert: (aPesoAndMinusOneDollarMinusAnEuro measureFor: peso) = aPeso.
-	self assert: (aPesoAndMinusOneDollarMinusAnEuro measureFor: aDollar) = minusOneDollar.
-	self assert: (aPesoAndMinusOneDollarMinusAnEuro measureFor: anEuro) = minusOneEuro.
+	self assert: (aPesoAndMinusOneDollarMinusAnEuro measureFor: dollar) = minusOneDollar.
+	self assert: (aPesoAndMinusOneDollarMinusAnEuro measureFor: euro) = minusOneEuro.
 	
 	self assert: (aPesoAndMinusOneDollarMinusAnEuro = minusOneEuroPlusAPesoAndMinusOneDollar).
 	! !
 
-!MeasureTest methodsFor: 'testing' stamp: 'E P 6/6/2017 19:34:54'!
+!MeasureTest methodsFor: 'testing' stamp: 'F C 6/7/2017 00:38:48'!
 test09
-
-	| aMeter kelvin |
-	aMeter _ Measure withAmount: 1 andUnit: DistanceUnit meter.
-	kelvin _ TemperatureUnit kelvin.
 	
-	self should: [ aMeter convertTo: kelvin ] 
+	self should: [ aMeter convertTo: TemperatureUnit kelvin ] 
 		 raise:  Error - MessageNotUnderstood 
 	      withExceptionDo: [ :anError | self assert: anError messageText equals: Measure convertToUnitOfDifferentTypeErrorDescription ].
 	
 	! !
 
-!MeasureTest methodsFor: 'testing' stamp: 'E P 6/6/2017 21:10:24'!
+!MeasureTest methodsFor: 'testing' stamp: 'F C 6/7/2017 00:39:05'!
 test10
 
-	| oneMeter zeroKelvin |
+	| oneMeter |
 	oneMeter _ Measure withAmount: 1 andUnit: DistanceUnit meter.
-	zeroKelvin _ Measure withAmount: 0 andUnit: TemperatureUnit kelvin.
 	
 	self assert: (oneMeter + zeroKelvin) = oneMeter. ! !
+
+
+!MeasureTest methodsFor: 'setup' stamp: 'F C 6/7/2017 00:37:18'!
+setUp
+
+	meter _ DistanceUnit meter.
+	peso _ ArgentinianCurrencyUnit peso.
+	dollar _ USCurrencyUnit dollar.
+	euro _ EuropeanCurrencyUnit euro.
+
+	aMeter _ Measure withAmount: 1 andUnit: meter.
+	aPeso _ Measure withAmount: 1 andUnit: peso.
+	aDollar _ Measure withAmount: 1 andUnit: dollar.
+	anEuro _ Measure withAmount: 1 andUnit: euro.
+	
+	zeroMeters _ Measure withAmount: 0 andUnit: DistanceUnit centimeter.
+	zeroPesos _ Measure withAmount: 0 andUnit: dollar.
+	zeroCelsius _ Measure withAmount: 0 andUnit: TemperatureUnit celsius. 
+	absoluteZero _ Measure withAmount: -273 andUnit: TemperatureUnit celsius. 
+	zeroKelvin _ Measure withAmount: 0 andUnit: TemperatureUnit kelvin. 
+	zeroEuros _ Measure withAmount: 0 andUnit: euro.	
+	
+	minusOnePeso _ aPeso negated.
+	minusOneDollar _ aDollar negated.
+	minusOneEuro _ anEuro negated.
+
+
+! !
 
 
 !classDefinition: #CompoundMeasure category: #'Measure-Solution'!
@@ -672,21 +652,21 @@ Object subclass: #CompoundMeasure
 	poolDictionaries: ''
 	category: 'Measure-Solution'!
 
-!CompoundMeasure methodsFor: 'initialization' stamp: 'E P 6/6/2017 20:48:58'!
-initializeWith: aConcreteMeasure with: anotherConcreteMeasure
-	
+!CompoundMeasure methodsFor: 'initialization' stamp: 'F C 6/7/2017 00:16:07'!
+initializeWith: aCollectionOfMeasures
+		
 	container _ Dictionary new.
-	container at: aConcreteMeasure unit put: aConcreteMeasure.
-	container at: anotherConcreteMeasure unit put: anotherConcreteMeasure.
+	aCollectionOfMeasures do: [ :aMeasure |
+		container at: aMeasure unit put: aMeasure 
+	].
 	! !
 
 
-!CompoundMeasure methodsFor: 'accessing' stamp: 'E P 6/6/2017 20:52:31'!
+!CompoundMeasure methodsFor: 'accessing' stamp: 'F C 6/7/2017 00:21:45'!
 measureFor: anUnit
 	
 	| aMeasure |
-	aMeasure _ container at: anUnit class baseUnit 
-		ifAbsent: [ ^NullMeasure withUnit: anUnit ].
+	aMeasure _ container at: anUnit class baseUnit ifAbsent: [ ^NullMeasure withUnit: anUnit ].
 	^aMeasure convertTo: anUnit.
 	! !
 
@@ -697,6 +677,11 @@ measureFor: anUnit
 	^anObject addCompoundMeasure: self.
 
 	! !
+
+!CompoundMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/7/2017 00:11:43'!
+- anObject
+
+	^anObject substractCompoundMeasure: self. ! !
 
 !CompoundMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/6/2017 22:55:37'!
 = anObject
@@ -709,34 +694,38 @@ measureFor: anUnit
 
 ! !
 
-!CompoundMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/5/2017 22:29:09'!
+!CompoundMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/7/2017 00:19:36'!
 addCompoundMeasure: aCompoundMeasure 
+	
+	| previousMeasure measures |
 
 	aCompoundMeasure do: [ :aMeasure |
-		self + aMeasure.
-	].! !
+		previousMeasure _ self measureFor: aMeasure unit.
+		container at: aMeasure unit put: (previousMeasure + aMeasure).
+	].
+	measures _ container select: [ :aMeasure | aMeasure isNullMeasure not].
+	
+	^CompoundMeasure with: measures.
+! !
 
-!CompoundMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/6/2017 23:13:06'!
+!CompoundMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/7/2017 00:01:45'!
 addConcreteMeasure: aConcreteMeasure 
 	
-	| newMeasure |
-	
-	newMeasure _ (self measureFor: aConcreteMeasure unit) + aConcreteMeasure.
-	
-	(newMeasure isNullMeasure) 
-	ifTrue: [
-		container removeKey: newMeasure unit.
-	]
-	ifFalse: [
-		container at: aConcreteMeasure convertToBaseUnit unit put: newMeasure
-	].! !
+	| newMeasure |	
 
-!CompoundMeasure methodsFor: 'arithmetic operations' stamp: 'E P 6/6/2017 20:53:17'!
+	newMeasure _ (self measureFor: aConcreteMeasure unit) + aConcreteMeasure.
+	container at: aConcreteMeasure convertToBaseUnit unit put: newMeasure.
+	^CompoundMeasure with: (container select: [ :aMeasure | aMeasure isNullMeasure not ])! !
+
+!CompoundMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/7/2017 00:00:34'!
 negated
 
-	self do: [ :aMeasure |
-		container at: aMeasure unit put: aMeasure negated.
-	].! !
+	^CompoundMeasure with: (container collect: [ :aMeasure | aMeasure negated]).! !
+
+!CompoundMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/7/2017 00:12:50'!
+substractConcreteMeasure: aConcreteMeasure 
+
+	^self + aConcreteMeasure negated.! !
 
 
 !CompoundMeasure methodsFor: 'enumeration' stamp: 'E P 6/6/2017 20:54:48'!
@@ -756,11 +745,12 @@ numberOfDifferentMeasures
 CompoundMeasure class
 	instanceVariableNames: ''!
 
-!CompoundMeasure class methodsFor: 'instance creation' stamp: 'E P 6/6/2017 20:18:17'!
-with: aConcreteMeasure with: anotherConcreteMeasure 
+!CompoundMeasure class methodsFor: 'instance creation' stamp: 'F C 6/6/2017 23:47:13'!
+with: aCollectionOfMeasures
 	
-	^self new initializeWith: aConcreteMeasure convertToBaseUnit 
-						with: anotherConcreteMeasure convertToBaseUnit 
+	| normalizedMeasures |
+	normalizedMeasures _ aCollectionOfMeasures collect: [ :aMeasure | aMeasure convertToBaseUnit ].
+	^self new initializeWith: normalizedMeasures.
 	
 	! !
 
@@ -1030,6 +1020,11 @@ Unit subclass: #TimeUnit
 !classDefinition: 'TimeUnit class' category: #'Measure-Solution'!
 TimeUnit class
 	instanceVariableNames: ''!
+
+!TimeUnit class methodsFor: 'as yet unclassified' stamp: 'F C 6/7/2017 00:26:02'!
+baseUnit
+
+	^self second.! !
 
 !TimeUnit class methodsFor: 'as yet unclassified' stamp: 'E P 6/4/2017 20:28:26'!
 day
