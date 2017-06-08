@@ -22,6 +22,61 @@ initializeWithMultiplyingUnits: multiplyingBag andDividingUnits: dividingBag
 
 	! !
 
+!CompoundUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/7/2017 23:58:56'!
+/ anObject
+
+	^anObject dividingCompoundUnit: self.
+
+
+	! !
+
+!CompoundUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/8/2017 01:01:19'!
+dividedBySimpleUnit: aSimpleUnit
+
+	|  multiplying dividing |
+	
+	multiplying _ multiplyingUnits copy.
+	dividing _ dividingUnits copy.
+	dividing add: aSimpleUnit.
+	
+	^CompoundUnit withMultiplyingUnits: multiplying andDividingUnits: dividing.
+
+	! !
+
+!CompoundUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/8/2017 00:51:22'!
+dividingCompoundUnit: aCompoundUnit
+
+	|  multiplying dividing |
+	
+	multiplying _ Bag new.
+	dividing _ Bag new.
+	
+	multiplyingUnits contents keysAndValuesDo: [ :anUnit :timesOfRepetition |
+		dividing add: anUnit withOccurrences: (timesOfRepetition + (aCompoundUnit exponentFor: anUnit)).
+	].
+	
+	dividingUnits contents keysAndValuesDo: [ :anUnit :timesOfRepetition |
+		multiplying add: anUnit withOccurrences: (timesOfRepetition + (aCompoundUnit exponentFor: anUnit)).
+	].
+	
+	^CompoundUnit withMultiplyingUnits: multiplying andDividingUnits: dividing.
+
+	! !
+
+!CompoundUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/8/2017 01:01:05'!
+dividingSimpleUnit: aSimpleUnit
+
+	|  multiplying dividing |
+	
+	multiplying _ dividingUnits copy.
+	multiplying add: aSimpleUnit.
+	
+	dividing _ multiplyingUnits copy.
+	
+	^CompoundUnit withMultiplyingUnits: multiplying andDividingUnits: dividing.
+
+	! !
+
 !CompoundUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/7/2017 20:19:22'!
 exponentFor: aSimpleUnit
 
@@ -31,16 +86,36 @@ exponentFor: aSimpleUnit
 
 	! !
 
-!CompoundUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/7/2017 20:16:33'!
+!CompoundUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/8/2017 00:40:53'!
 multiplyByCompoundUnit: aCompoundUnit
 
-
+	|  multiplying dividing |
+	
+	multiplying _ Bag new.
+	dividing _ Bag new.
+	
+	multiplyingUnits contents keysAndValuesDo: [ :anUnit :timesOfRepetition |
+		multiplying add: anUnit withOccurrences: (timesOfRepetition + aCompoundUnit exponentFor: anUnit).
+	].
+	
+	dividingUnits contents keysAndValuesDo: [ :anUnit :timesOfRepetition |
+		multiplying add: anUnit withOccurrences: (timesOfRepetition + aCompoundUnit exponentFor: anUnit).
+	].
+	
+	^CompoundUnit withMultiplyingUnits: multiplying andDividingUnits: dividing.
 
 	! !
 
-!CompoundUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/7/2017 23:48:03'!
+!CompoundUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/8/2017 01:01:35'!
 multiplyBySimpleUnit: aSimpleUnit 
-	! !
+	
+	|  multiplying dividing |
+	
+	multiplying _ multiplyingUnits copy.
+	multiplying add: aSimpleUnit.
+	dividing _ dividingUnits copy.
+	
+	^CompoundUnit withMultiplyingUnits: multiplying andDividingUnits: dividing.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -48,31 +123,10 @@ multiplyBySimpleUnit: aSimpleUnit
 CompoundUnit class
 	instanceVariableNames: ''!
 
-!CompoundUnit class methodsFor: 'instance creation' stamp: 'E P 6/7/2017 21:04:54'!
-with: anUnit dividedBy: anotherUnit
+!CompoundUnit class methodsFor: 'instance creation' stamp: 'E P 6/8/2017 00:13:08'!
+withMultiplyingUnits: multiplyingUnits andDividingUnits: dividingUnits
 
-	| dividingUnits multiplyingUnits |
-	
-	multiplyingUnits _ Bag new.
-	multiplyingUnits add: anUnit.
-	
-	dividingUnits _ Bag new.
-	dividingUnits add: anotherUnit.
-	
-	^self new initializeWithMultiplyingUnits: multiplyingUnits andDividingUnits: dividingUnits.! !
-
-!CompoundUnit class methodsFor: 'instance creation' stamp: 'E P 6/7/2017 20:27:04'!
-with: anUnit multiplying: anotherUnit
-
-	| dividingUnits multiplyingUnits |
-	
-	multiplyingUnits _ Bag new.
-	multiplyingUnits add: anUnit.
-	multiplyingUnits add: anotherUnit.
-	
-	dividingUnits _ Bag new.
-	
-	^self new initializeWithMultiplyingUnits: multiplyingUnits andDividingUnits: dividingUnits.! !
+	^self new initializeWithMultiplyingUnits: multiplyingUnits andDividingUnits: dividingUnits! !
 
 
 !classDefinition: #SimpleUnit category: #'Measure-Solution'!
@@ -126,37 +180,59 @@ ratio
 	^ ratio.! !
 
 
-!SimpleUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/7/2017 19:16:46'!
+!SimpleUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/8/2017 00:17:12'!
 * anObject
 
-	^anObject multiplyByUnit: self.
+	^anObject multiplyBySimpleUnit: self.
 	! !
 
-!SimpleUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/7/2017 20:59:40'!
+!SimpleUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/8/2017 00:17:34'!
 / anObject 
 	
-	^anObject dividingUnit: self.! !
+	^anObject dividingSimpleUnit: self.! !
 
 !SimpleUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/7/2017 19:16:53'!
 adaptToNumber: aNumber andSend: aSymbol 
 
 	^Measure withAmount: aNumber andUnit: self.! !
 
-!SimpleUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/7/2017 21:00:11'!
-dividingUnit: anUnit
+!SimpleUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/8/2017 00:49:14'!
+dividingCompoundUnit: aCompoundUnit
 
-	^CompoundUnit with: anUnit dividedBy: self.
+	^aCompoundUnit dividedBySimpleUnit: self.
 	! !
 
-!SimpleUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/7/2017 21:38:09'!
-multiplyByCompoundUnit: aCompoundUnit 
+!SimpleUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/8/2017 00:17:23'!
+dividingSimpleUnit: anUnit
+
+	| dividingUnits multiplyingUnits |
+	
+	multiplyingUnits _ Bag new.
+	multiplyingUnits add: anUnit.
+	
+	dividingUnits _ Bag new.
+	dividingUnits add: self.
+	
+	^CompoundUnit withMultiplyingUnits: multiplyingUnits andDividingUnits: dividingUnits.
+	! !
+
+!SimpleUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/8/2017 00:42:45'!
+multiplyByCompoundUnit: aCompoundUnit
 	
 	^aCompoundUnit multiplyBySimpleUnit: self.! !
 
-!SimpleUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/7/2017 20:20:06'!
-multiplyByUnit: anUnit
+!SimpleUnit methodsFor: 'arithmetic operations' stamp: 'E P 6/8/2017 00:17:05'!
+multiplyBySimpleUnit: anUnit
 
-	^CompoundUnit with: self multiplying: anUnit.
+	| dividingUnits multiplyingUnits |
+	
+	multiplyingUnits _ Bag new.
+	multiplyingUnits add: self.
+	multiplyingUnits add: anUnit.
+	
+	dividingUnits _ Bag new.
+	
+	^CompoundUnit withMultiplyingUnits: multiplyingUnits andDividingUnits: dividingUnits.
 	! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
@@ -377,10 +453,133 @@ dollar
 
 !classDefinition: #Measure category: #'Measure-Solution'!
 Magnitude subclass: #Measure
-	instanceVariableNames: ''
+	instanceVariableNames: 'unit amount'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Measure-Solution'!
+
+!Measure methodsFor: 'arithmetic operations' stamp: 'F C 6/8/2017 00:35:59'!
+* aNumber
+
+	^Measure withAmount: amount * aNumber andUnit: unit.! !
+
+!Measure methodsFor: 'arithmetic operations' stamp: 'F C 6/8/2017 00:31:07'!
++ aMeasure
+
+	self subclassResponsibility.! !
+
+!Measure methodsFor: 'arithmetic operations' stamp: 'F C 6/8/2017 00:36:49'!
+- aMeasure 
+
+	^self + aMeasure negated.! !
+
+!Measure methodsFor: 'arithmetic operations' stamp: 'F C 6/8/2017 00:46:32'!
+/ aNumber
+
+	self subclassResponsibility.! !
+
+!Measure methodsFor: 'arithmetic operations' stamp: 'F C 6/8/2017 00:19:45'!
+adaptToNumber: aNumber andSend: aSymbol 
+
+	^self * aNumber.! !
+
+!Measure methodsFor: 'arithmetic operations' stamp: 'F C 6/8/2017 00:54:41'!
+addCompoundMeasure: aCompoundMeasure 
+	
+	self subclassResponsibility.! !
+
+!Measure methodsFor: 'arithmetic operations' stamp: 'F C 6/8/2017 00:39:58'!
+addConcreteMeasure: aConcreteMeasure
+
+	self subclassResponsibility.! !
+
+!Measure methodsFor: 'arithmetic operations' stamp: 'F C 6/8/2017 00:21:09'!
+negated
+
+	self subclassResponsibility.! !
+
+!Measure methodsFor: 'arithmetic operations' stamp: 'F C 6/8/2017 00:55:43'!
+substractCompoundMeasure: aCompoundMeasure 
+
+	self subclassResponsibility.! !
+
+
+!Measure methodsFor: 'comparing' stamp: 'F C 6/8/2017 00:14:34'!
+< aMeasure 
+
+	^self amountInBaseUnit < aMeasure amountInBaseUnit.! !
+
+!Measure methodsFor: 'comparing' stamp: 'F C 6/8/2017 00:24:11'!
+= anObject
+
+	self subclassResponsibility.! !
+
+!Measure methodsFor: 'comparing' stamp: 'F C 6/8/2017 00:15:15'!
+hash
+
+	^self amountInBaseUnit hash.! !
+
+
+!Measure methodsFor: 'accessing' stamp: 'F C 6/8/2017 00:18:26'!
+amount
+
+	^amount.! !
+
+!Measure methodsFor: 'accessing' stamp: 'F C 6/8/2017 00:30:10'!
+amountInBaseUnit
+
+	^(self convertTo: unit class baseUnit) amount.! !
+
+!Measure methodsFor: 'accessing' stamp: 'F C 6/8/2017 00:18:32'!
+unit
+
+	^unit.! !
+
+
+!Measure methodsFor: 'intervals' stamp: 'F C 6/8/2017 00:22:38'!
+to: aMeasure
+
+	| measureIncrement |
+	
+	measureIncrement _ self class withAmount: 1 andUnit: unit.
+	^self to: aMeasure by: measureIncrement.! !
+
+!Measure methodsFor: 'intervals' stamp: 'F C 6/8/2017 00:22:49'!
+to: aMeasure by: aMeasureIncrement 
+	
+	^MeasureInterval withStart: self stop: aMeasure andStep: aMeasureIncrement.! !
+
+!Measure methodsFor: 'intervals' stamp: 'F C 6/8/2017 00:23:00'!
+to: aMeasure by: aMeasureIncrement do: aBlockClosure 
+
+	(self to: aMeasure by: aMeasureIncrement) do: aBlockClosure.! !
+
+
+!Measure methodsFor: 'printing' stamp: 'F C 6/8/2017 00:21:50'!
+printString
+
+	| measureAsString |
+	measureAsString _ amount printString, ' ', unit printString.
+	(amount > 1) 
+		ifTrue: [ ^measureAsString, 's' ]
+		ifFalse: [ ^measureAsString] .! !
+
+
+!Measure methodsFor: 'converting' stamp: 'F C 6/8/2017 00:24:52'!
+convertTo: anUnit
+
+	self subclassResponsibility.! !
+
+!Measure methodsFor: 'converting' stamp: 'F C 6/8/2017 00:26:28'!
+convertToBaseUnit 
+
+	^self convertTo: self unit class baseUnit.! !
+
+
+!Measure methodsFor: 'testing' stamp: 'F C 6/8/2017 00:48:25'!
+isNullMeasure
+
+	self subclassResponsibility.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -405,15 +604,10 @@ convertToUnitOfDifferentTypeErrorDescription
 
 !classDefinition: #ConcreteMeasure category: #'Measure-Solution'!
 Measure subclass: #ConcreteMeasure
-	instanceVariableNames: 'unit amount'
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Measure-Solution'!
-
-!ConcreteMeasure methodsFor: 'converting' stamp: 'F C 6/4/2017 16:49:16'!
-amountInBaseUnit
-
-	^(self convertTo: unit class baseUnit) amount.! !
 
 !ConcreteMeasure methodsFor: 'converting' stamp: 'E P 6/6/2017 19:45:34'!
 convertTo: anUnit
@@ -421,18 +615,6 @@ convertTo: anUnit
 	(anUnit isKindOf: self unit class) ifFalse: [ self error: Measure convertToUnitOfDifferentTypeErrorDescription ].
 	^self class withAmount: ((amount * unit ratio) / anUnit ratio) andUnit: anUnit.! !
 
-!ConcreteMeasure methodsFor: 'converting' stamp: 'E P 6/6/2017 20:27:40'!
-convertToBaseUnit 
-
-	^self convertTo: self unit class baseUnit.! !
-
-
-!ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/4/2017 15:55:22'!
-* aNumber
-
-	^self class withAmount: amount * aNumber andUnit: unit.
-	
-	! !
 
 !ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/5/2017 20:57:24'!
 + aMeasure
@@ -441,17 +623,12 @@ convertToBaseUnit
 	
 ! !
 
-!ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/5/2017 22:37:56'!
-- aMeasure 
-
-	^self + aMeasure negated.! !
-
 !ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/4/2017 16:06:53'!
 / aNumber 
 
 	^self class withAmount: (amount / aNumber) andUnit: unit. ! !
 
-!ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/5/2017 21:48:57'!
+!ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/8/2017 00:54:28'!
 addCompoundMeasure: aCompoundMeasure 
 	
 	^aCompoundMeasure addConcreteMeasure: self.! !
@@ -468,32 +645,11 @@ addConcreteMeasure: aConcreteMeasure
 		^CompoundMeasure with: { self.  aConcreteMeasure. }.
 	]! !
 
-!ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/4/2017 16:19:41'!
-hash
-
-	^self amountInBaseUnit hash.! !
-
-!ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/4/2017 16:22:55'!
-initializeWithAmount: anAmount andUnit: anUnit
-
-	amount _ anAmount.
-	unit _ anUnit.! !
-
 !ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/4/2017 16:09:04'!
 negated
 	
 	^self class withAmount: amount negated andUnit: unit.! !
 
-!ConcreteMeasure methodsFor: 'arithmetic operations' stamp: 'F C 6/7/2017 00:12:24'!
-substractCompoundMeasure: aCompoundMeasure 
-
-	^aCompoundMeasure substractConcreteMeasure: self.! !
-
-
-!ConcreteMeasure methodsFor: 'comparing' stamp: 'F C 6/4/2017 16:12:28'!
-< aMeasure 
-
-	^self amountInBaseUnit < aMeasure amountInBaseUnit.! !
 
 !ConcreteMeasure methodsFor: 'comparing' stamp: 'E P 6/4/2017 18:52:43'!
 = anObject
@@ -507,56 +663,23 @@ substractCompoundMeasure: aCompoundMeasure
 	
 	! !
 
-!ConcreteMeasure methodsFor: 'comparing' stamp: 'F C 6/4/2017 16:25:44'!
-adaptToNumber: aNumber andSend: aSymbol 
-
-	^self * aNumber.! !
-
-
-!ConcreteMeasure methodsFor: 'accessing' stamp: 'F C 6/4/2017 16:11:42'!
-amount
-
-	^amount.! !
-
-!ConcreteMeasure methodsFor: 'accessing' stamp: 'F C 6/4/2017 16:11:31'!
-unit
-
-	^unit.! !
-
-
-!ConcreteMeasure methodsFor: 'printing' stamp: 'F C 6/4/2017 16:28:38'!
-printString
-
-	| measureAsString |
-	measureAsString _ amount printString, ' ', unit printString.
-	(amount > 1) 
-		ifTrue: [ ^measureAsString, 's' ]
-		ifFalse: [ ^measureAsString] .! !
-
-
-!ConcreteMeasure methodsFor: 'intervals' stamp: 'F C 6/4/2017 16:31:07'!
-to: aMeasure
-
-	| measureIncrement |
-	
-	measureIncrement _ self class withAmount: 1 andUnit: unit.
-	^self to: aMeasure by: measureIncrement.! !
-
-!ConcreteMeasure methodsFor: 'intervals' stamp: 'F C 6/4/2017 16:40:43'!
-to: aMeasure by: aMeasureIncrement 
-	
-	^MeasureInterval withStart: self stop: aMeasure andStep: aMeasureIncrement.! !
-
-!ConcreteMeasure methodsFor: 'intervals' stamp: 'F C 6/4/2017 16:32:52'!
-to: aMeasure by: aMeasureIncrement do: aBlockClosure 
-
-	(self to: aMeasure by: aMeasureIncrement) do: aBlockClosure.! !
-
 
 !ConcreteMeasure methodsFor: 'testing' stamp: 'E P 6/4/2017 19:37:48'!
 isNullMeasure
 	
 	^false.! !
+
+!ConcreteMeasure methodsFor: 'testing' stamp: 'E P 6/8/2017 01:30:35'!
+substractCompoundMeasure: aCompoundMeasure 
+
+	^self negated + aCompoundMeasure.! !
+
+
+!ConcreteMeasure methodsFor: 'instance creation' stamp: 'F C 6/4/2017 16:22:55'!
+initializeWithAmount: anAmount andUnit: anUnit
+
+	amount _ anAmount.
+	unit _ anUnit.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -575,15 +698,16 @@ withAmount: anAmount andUnit: anUnit
 
 !classDefinition: #NullMeasure category: #'Measure-Solution'!
 Measure subclass: #NullMeasure
-	instanceVariableNames: 'unit'
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Measure-Solution'!
 
-!NullMeasure methodsFor: 'instance creation' stamp: 'E P 6/4/2017 19:24:58'!
+!NullMeasure methodsFor: 'instance creation' stamp: 'F C 6/8/2017 00:29:14'!
 initializeWithUnit: anUnit
 
-	unit _ anUnit.! !
+	unit _ anUnit.
+	amount _ anUnit nullValue.! !
 
 
 !NullMeasure methodsFor: 'comparing' stamp: 'E P 6/4/2017 18:05:49'!
@@ -595,43 +719,26 @@ initializeWithUnit: anUnit
 	! !
 
 
-!NullMeasure methodsFor: 'converting' stamp: 'E P 6/7/2017 18:51:19'!
-adaptToNumber: aNumber andSend: aSymbol 
-
-	^self.! !
-
-!NullMeasure methodsFor: 'converting' stamp: 'E P 6/4/2017 19:26:15'!
-amountInBaseUnit
-	
-	^self unit nullValue.! !
-
 !NullMeasure methodsFor: 'converting' stamp: 'F C 6/7/2017 00:05:26'!
 convertTo: anUnit
 
 	^NullMeasure withUnit: anUnit.! !
 
 
-!NullMeasure methodsFor: 'accessing' stamp: 'E P 6/4/2017 19:25:46'!
-unit
-
-	^unit.! !
-
-
-!NullMeasure methodsFor: 'arithmetic operation' stamp: 'E P 6/7/2017 18:53:42'!
-* aNumber
-
-	^self.! !
-
 !NullMeasure methodsFor: 'arithmetic operation' stamp: 'E P 6/6/2017 21:18:16'!
 + aMeasure 
 	
      ^aMeasure.! !
 
-!NullMeasure methodsFor: 'arithmetic operation' stamp: 'E P 6/4/2017 19:38:50'!
-- aMeasure 
+!NullMeasure methodsFor: 'arithmetic operation' stamp: 'F C 6/8/2017 00:39:07'!
+/ aMeasure
+
+	self error: 'cannot divide by nothing'.! !
+
+!NullMeasure methodsFor: 'arithmetic operation' stamp: 'F C 6/8/2017 00:55:04'!
+addCompoundMeasure: aCompoundMeasure 
 	
-	aMeasure isNullMeasure ifTrue: [ ^self ]
-		ifFalse: [ ^aMeasure - self ].! !
+	^aCompoundMeasure.! !
 
 !NullMeasure methodsFor: 'arithmetic operation' stamp: 'F C 6/6/2017 23:33:04'!
 addConcreteMeasure: aConcreteMeasure 
@@ -643,6 +750,16 @@ addConcreteMeasure: aConcreteMeasure
 isNullMeasure
 
 	^true.! !
+
+!NullMeasure methodsFor: 'testing' stamp: 'F C 6/8/2017 00:21:25'!
+negated
+
+	^self.! !
+
+!NullMeasure methodsFor: 'testing' stamp: 'F C 6/8/2017 00:59:29'!
+substractCompoundMeasure: aCompoundMeasure 
+
+	^aCompoundMeasure negated.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -811,7 +928,7 @@ test12CanPassADistanceAsStepAndTheStartAndStopOfTheIntervalCanHaveDifferentUnits
 	
 	self assertThatInterval: aDistanceInterval onlyContains: { nineHundredNinetyEightMeters . nineHundredNinetyNineMeters . oneKilometer . }.! !
 
-!DistanceTest methodsFor: 'testing' stamp: 'F C 6/4/2017 19:18:10'!
+!DistanceTest methodsFor: 'testing' stamp: 'E P 6/8/2017 01:20:50'!
 test13AnIntervalCanBeCreatedWithAClosureAsCollaboratorAndTheClosureReceivesTheValuesOfTheInterval
 
 	| totalDistance gaussSumDistance |
@@ -843,7 +960,7 @@ test17NegatingADistanceShouldBeReflective
 	self assert: minusOneMeter negated negated = minusOneMeter .! !
 
 
-!DistanceTest methodsFor: 'setup' stamp: 'F C 6/4/2017 19:17:48'!
+!DistanceTest methodsFor: 'setup' stamp: 'E P 6/8/2017 01:21:13'!
 setUp
 
 	| aDistanceFactory |
@@ -902,7 +1019,7 @@ test02
 	
 	! !
 
-!MeasureTest methodsFor: 'testing' stamp: 'F C 6/7/2017 00:34:07'!
+!MeasureTest methodsFor: 'testing' stamp: 'E P 6/8/2017 01:24:23'!
 test03
 	
 	| tenMeters  |
@@ -929,7 +1046,7 @@ test04
 	
 	! !
 
-!MeasureTest methodsFor: 'testing' stamp: 'F C 6/7/2017 00:34:39'!
+!MeasureTest methodsFor: 'testing' stamp: 'E P 6/8/2017 01:24:31'!
 test05
 
 	|  aPesoAndADollarPlusAnEuro anEuroPlusAPesoAndADollar |
@@ -937,37 +1054,37 @@ test05
 	aPesoAndADollarPlusAnEuro _ (aPeso + aDollar) + anEuro.
 	anEuroPlusAPesoAndADollar _ anEuro + (aPeso + aDollar).
 	
-	self assert: (aPesoAndADollarPlusAnEuro isKindOf: CompoundMeasure).
+	self assert: (aPesoAndADollarPlusAnEuro isKindOf: CompoundMeasure ).
 	self assert: (aPesoAndADollarPlusAnEuro measureFor: euro) = anEuro.
 	self assert: (anEuroPlusAPesoAndADollar) = (aPesoAndADollarPlusAnEuro).
 
 	
 	! !
 
-!MeasureTest methodsFor: 'testing' stamp: 'F C 6/7/2017 00:37:40'!
+!MeasureTest methodsFor: 'testing' stamp: 'E P 6/8/2017 01:24:36'!
 test06
 
 	|  aPesoAndADollarPlusMinusOnePesoAndAnEuro |
 	
 	aPesoAndADollarPlusMinusOnePesoAndAnEuro _ (aPeso + aDollar) + ( minusOnePeso + anEuro).
 	
-	self assert: (aPesoAndADollarPlusMinusOnePesoAndAnEuro isKindOf: CompoundMeasure).
+	self assert: (aPesoAndADollarPlusMinusOnePesoAndAnEuro isKindOf: CompoundMeasure ).
 	self assert: (aPesoAndADollarPlusMinusOnePesoAndAnEuro measureFor: euro) = anEuro.	
 	self assert: (aPesoAndADollarPlusMinusOnePesoAndAnEuro measureFor: peso) = zeroPesos.		
 	self assert: (aPesoAndADollarPlusMinusOnePesoAndAnEuro measureFor: dollar) = aDollar.! !
 
-!MeasureTest methodsFor: 'testing' stamp: 'F C 6/7/2017 00:37:57'!
+!MeasureTest methodsFor: 'testing' stamp: 'E P 6/8/2017 01:24:42'!
 test07
 
 	| aPesoAndADollar |
 
 	aPesoAndADollar _ aPeso + aDollar.
 	
-	self assert: (aPesoAndADollar negated isKindOf: CompoundMeasure).
+	self assert: (aPesoAndADollar negated isKindOf: CompoundMeasure ).
 	self assert: (aPesoAndADollar negated measureFor: peso) = minusOnePeso.	
 	self assert: (aPesoAndADollar negated measureFor: dollar) = minusOneDollar.! !
 
-!MeasureTest methodsFor: 'testing' stamp: 'F C 6/7/2017 00:38:25'!
+!MeasureTest methodsFor: 'testing' stamp: 'E P 6/8/2017 01:24:49'!
 test08
 
 	| aPesoAndMinusOneDollar aPesoAndMinusOneDollarMinusAnEuro minusOneEuroPlusAPesoAndMinusOneDollar |
@@ -976,7 +1093,7 @@ test08
 	aPesoAndMinusOneDollarMinusAnEuro _ (aPeso - aDollar) - anEuro.
 	minusOneEuroPlusAPesoAndMinusOneDollar _ minusOneEuro + aPesoAndMinusOneDollar.
 	
-	self assert: (aPesoAndMinusOneDollar isKindOf: CompoundMeasure).
+	self assert: (aPesoAndMinusOneDollar isKindOf: CompoundMeasure ).
 	self assert: (aPesoAndMinusOneDollar measureFor: peso) = aPeso.	
 	self assert: (aPesoAndMinusOneDollar measureFor: dollar) = minusOneDollar.
 	
@@ -988,7 +1105,7 @@ test08
 	self assert: (aPesoAndMinusOneDollarMinusAnEuro = minusOneEuroPlusAPesoAndMinusOneDollar).
 	! !
 
-!MeasureTest methodsFor: 'testing' stamp: 'F C 6/7/2017 00:38:48'!
+!MeasureTest methodsFor: 'testing' stamp: 'E P 6/8/2017 01:24:57'!
 test09
 	
 	self should: [ aMeter convertTo: TemperatureUnit kelvin ] 
@@ -997,7 +1114,7 @@ test09
 	
 	! !
 
-!MeasureTest methodsFor: 'testing' stamp: 'F C 6/7/2017 00:39:05'!
+!MeasureTest methodsFor: 'testing' stamp: 'E P 6/8/2017 01:25:02'!
 test10
 
 	| oneMeter |
@@ -1011,7 +1128,7 @@ test11
 	self assert: zeroKelvin * 20 = zeroKelvin.
 	self assert: -5 * zeroMeters = zeroMeters.! !
 
-!MeasureTest methodsFor: 'testing' stamp: 'E P 6/7/2017 21:35:15'!
+!MeasureTest methodsFor: 'testing' stamp: 'E P 6/8/2017 00:53:34'!
 test12
 	
 	self assert: (squaredMeter isKindOf: CompoundUnit).
@@ -1046,7 +1163,7 @@ test13
 	! !
 
 
-!MeasureTest methodsFor: 'setup' stamp: 'E P 6/7/2017 21:35:05'!
+!MeasureTest methodsFor: 'setup' stamp: 'E P 6/8/2017 01:24:00'!
 setUp
 
 	meter _ DistanceUnit meter.
@@ -1102,7 +1219,7 @@ initializeWith: aCollectionOfMeasures
 	! !
 
 
-!CompoundMeasure methodsFor: 'accessing' stamp: 'F C 6/7/2017 00:21:45'!
+!CompoundMeasure methodsFor: 'accessing' stamp: 'E P 6/8/2017 01:25:26'!
 measureFor: anUnit
 	
 	| aMeasure |
@@ -1201,37 +1318,37 @@ Object subclass: #DistanceFactory
 	poolDictionaries: ''
 	category: 'Measure-Solution'!
 
-!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 6/4/2017 18:54:25'!
+!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 6/8/2017 01:21:50'!
 minusOneMeter
 
 	^ConcreteMeasure withAmount: -1 andUnit: DistanceUnit meter.! !
 
-!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 6/4/2017 18:54:30'!
+!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 6/8/2017 01:21:54'!
 oneCentimeter
 
 	^ConcreteMeasure withAmount: 1 andUnit: DistanceUnit centimeter . ! !
 
-!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 6/4/2017 18:54:22'!
+!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 6/8/2017 01:21:58'!
 oneHundredCentimeters
 
 	^ConcreteMeasure withAmount: 100 andUnit: DistanceUnit centimeter.! !
 
-!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 6/4/2017 18:54:37'!
+!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 6/8/2017 01:22:01'!
 oneMeter
 
 	^ConcreteMeasure withAmount: 1 andUnit: DistanceUnit meter.! !
 
-!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 6/4/2017 18:54:15'!
+!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 6/8/2017 01:22:04'!
 twoHundredCentimeters
 
 	^ConcreteMeasure withAmount: 200 andUnit: DistanceUnit centimeter.! !
 
-!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 6/4/2017 18:54:40'!
+!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 6/8/2017 01:22:07'!
 twoMeters
 
 	^ConcreteMeasure withAmount: 2 andUnit: DistanceUnit meter.! !
 
-!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 6/4/2017 18:54:07'!
+!DistanceFactory methodsFor: 'instance creation' stamp: 'E P 6/8/2017 01:22:10'!
 zeroMeters
 
 	^ConcreteMeasure withAmount: 0 andUnit: DistanceUnit meter.! !
