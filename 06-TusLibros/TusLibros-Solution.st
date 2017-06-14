@@ -1,6 +1,6 @@
 !classDefinition: #TusLibrosTest category: #'TusLibros-Solution'!
 TestCase subclass: #TusLibrosTest
-	instanceVariableNames: 'cart'
+	instanceVariableNames: 'cart aCatalog anIsbnInCatalog anIsbnNotInCatalog'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
@@ -10,63 +10,76 @@ test01ACartIsEmptyWhenCreated
 
 	self assert: cart isEmpty.! !
 
-!TusLibrosTest methodsFor: 'cart tests' stamp: 'F C 6/10/2017 23:41:05'!
+!TusLibrosTest methodsFor: 'cart tests' stamp: 'E P 6/13/2017 21:36:03'!
 test02ACartContainsElementWhenItIsAdded
-
-	| isbn |
 	
-	isbn _ '1234567890'.
-	cart add: isbn. 
+	cart add: anIsbnInCatalog. 
 
-	self assert: ((cart quantityFor: isbn) = 1).	
-	self assert: cart numberOfBooks = 1.
+	self assert: ((cart quantityFor: anIsbnInCatalog) = 1).	
+	self assert: cart size = 1.
 ! !
 
-!TusLibrosTest methodsFor: 'cart tests' stamp: 'F C 6/10/2017 23:59:03'!
+!TusLibrosTest methodsFor: 'cart tests' stamp: 'E P 6/13/2017 21:40:16'!
 test03WhenANegativeQuantityOfBooksAreAddedAnErrorIsRaisedAndTheProductIsNotAdded
 
-	| isbn |
-	
-	isbn _ '1234567890'.
-
-	{-2. 0 } do: [ :aQuantity |
-				self should: [ cart add: isbn withQuantity: aQuantity ] 
+	{ -2. 0. 5.6. 4/5. } do: [ :aQuantity |
+				self should: [ cart add: anIsbnInCatalog withQuantity: aQuantity ] 
 				 raise: Error - MessageNotUnderstood  
 				 withExceptionDo: [ :anError | 
-					self assert: anError messageText = Cart negativeQuantityOfBooksErrorDescription.
-					self assert: (cart quantityFor: isbn) = 0.
+					self assert: anError messageText = Cart invalidQuantityErrorMessage.
+					self assert: cart isEmpty.
 				]	
-			]
-	
+			]! !
 
-	! !
-
-!TusLibrosTest methodsFor: 'cart tests' stamp: 'F C 6/10/2017 23:55:49'!
+!TusLibrosTest methodsFor: 'cart tests' stamp: 'E P 6/13/2017 21:36:56'!
 test04CartAddsABookWithMoreThanOneCopyCorreclty
 
-	| isbn |
+	cart add: anIsbnInCatalog withQuantity: 4.
 	
-	isbn _ '1234567890'.
-	cart add: isbn withQuantity: 4.
-	
-	self assert: (cart quantityFor: isbn) = 4. 
+	self assert: (cart quantityFor: anIsbnInCatalog) = 4. 
 		! !
 
-!TusLibrosTest methodsFor: 'cart tests' stamp: 'F C 6/11/2017 00:03:01'!
+!TusLibrosTest methodsFor: 'cart tests' stamp: 'E P 6/13/2017 21:37:17'!
 test05AddingBookThatsNotOnTheCatalogueRaisesError
+	
+	self should: [ cart add: anIsbnNotInCatalog. ]
+		raise: Error - MessageNotUnderstood  
+		withExceptionDo: [ :anError | 
+			self assert: anError messageText = 'Cannot add a product that is not part of the catalog'. 
+			self assert: cart isEmpty.
+		].
+		! !
 
-	"hay que pensar si es parte del cart o parte de la interfaz esto"! !
+!TusLibrosTest methodsFor: 'cart tests' stamp: 'E P 6/13/2017 21:52:59'!
+test06WhenAskedForContentsACartShouldReturnACollectionWithItsContents
+
+	| aCollection |
+	
+	cart add: anIsbnInCatalog withQuantity: 4.
+	aCollection _ cart contents.
+	
+	self assert: aCollection size = 4.
+	self assert: (aCollection select: [ :aBook |  aBook = anIsbnInCatalog ]) size = 4.
+	
+	
+	
+		! !
 
 
-!TusLibrosTest methodsFor: 'setup' stamp: 'F C 6/10/2017 23:33:02'!
+!TusLibrosTest methodsFor: 'setup' stamp: 'E P 6/13/2017 21:34:50'!
 setUp
 
-	cart _ Cart new.! !
+	anIsbnInCatalog _ '123456'.
+	anIsbnNotInCatalog _ '654321'.
+	
+	aCatalog _ {anIsbnInCatalog} asSet. 
+	cart _ Cart withCatalog: aCatalog.
+	! !
 
 
 !classDefinition: #Cart category: #'TusLibros-Solution'!
 Object subclass: #Cart
-	instanceVariableNames: 'container'
+	instanceVariableNames: 'container catalog'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
@@ -76,31 +89,28 @@ isEmpty
 
 	^container isEmpty.! !
 
-!Cart methodsFor: 'testing' stamp: 'F C 6/10/2017 23:39:03'!
-numberOfBooks
-
-	^container size.! !
-
 
 !Cart methodsFor: 'adding' stamp: 'F C 6/10/2017 23:24:35'!
 add: aBook 
 	
 	self add: aBook withQuantity: 1.! !
 
-!Cart methodsFor: 'adding' stamp: 'F C 6/11/2017 00:03:39'!
-add: aBook withQuantity: anInteger
+!Cart methodsFor: 'adding' stamp: 'E P 6/13/2017 21:45:50'!
+add: aBook withQuantity: aNumber
 	
-	anInteger strictlyPositive ifFalse: [ self error: self class negativeQuantityOfBooksErrorDescription ].
-	container add: aBook withOccurrences: anInteger.
+	((aNumber isKindOf: Integer) and: [aNumber strictlyPositive]) ifFalse: [ self error: self class invalidQuantityErrorMessage ].
+	(catalog includes: aBook) ifFalse: [ self error: 'Cannot add a product that is not part of the catalog'. ].
+	container add: aBook withOccurrences: aNumber.
 	
 	
 	! !
 
 
-!Cart methodsFor: 'initialization' stamp: 'E P 6/9/2017 19:48:45'!
-initialize
+!Cart methodsFor: 'initialization' stamp: 'E P 6/13/2017 21:32:47'!
+initializeWithCatalog: aCatalog.
 
-	container _ Bag new.! !
+	container _ Bag new.
+	catalog _ aCatalog.! !
 
 
 !Cart methodsFor: 'accessing' stamp: 'F C 6/10/2017 23:26:38'!
@@ -108,13 +118,38 @@ quantityFor: aBook
 	
 	^container occurrencesOf: aBook.! !
 
+!Cart methodsFor: 'accessing' stamp: 'E P 6/13/2017 19:43:17'!
+size
+
+	^container size.! !
+
+
+!Cart methodsFor: 'listing' stamp: 'E P 6/13/2017 21:54:36'!
+contents
+	
+	^container copy.! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'Cart class' category: #'TusLibros-Solution'!
 Cart class
 	instanceVariableNames: 'container'!
 
-!Cart class methodsFor: 'error description' stamp: 'F C 6/10/2017 23:47:32'!
-negativeQuantityOfBooksErrorDescription
+!Cart class methodsFor: 'instance creation' stamp: 'E P 6/13/2017 21:32:09'!
+withCatalog: aCatalog
+
+	^self new initializeWithCatalog: aCatalog.! !
+
+
+!Cart class methodsFor: 'error description' stamp: 'E P 6/13/2017 21:43:29'!
+invalidQuantityErrorMessage
 	
-	^'Must add one or more books to the cart.'! !
+	^'Must specify a valid amount of products to add to the Cart'.! !
+
+
+!classDefinition: #TusLibros category: #'TusLibros-Solution'!
+Object subclass: #TusLibros
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros-Solution'!
