@@ -1,6 +1,6 @@
 !classDefinition: #TusLibrosTest category: #'TusLibros-Solution'!
 TestCase subclass: #TusLibrosTest
-	instanceVariableNames: 'cart aCatalog anIsbnInCatalog anIsbnNotInCatalog aCashier emptyCart priceList'
+	instanceVariableNames: 'cart aCatalog anIsbnNotInCatalog aCashier emptyCart priceList isbn1InCatalog isbn2InCatalog isbn3InCatalog'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
@@ -10,20 +10,20 @@ test01ACartIsEmptyWhenCreated
 
 	self assert: cart isEmpty.! !
 
-!TusLibrosTest methodsFor: 'cart tests' stamp: 'E P 6/13/2017 21:36:03'!
+!TusLibrosTest methodsFor: 'cart tests' stamp: 'F C 6/15/2017 19:28:57'!
 test02ACartContainsElementWhenItIsAdded
 	
-	cart add: anIsbnInCatalog. 
+	cart add: isbn1InCatalog . 
 
-	self assert: ((cart quantityFor: anIsbnInCatalog) = 1).	
+	self assert: ((cart quantityFor: isbn1InCatalog ) = 1).	
 	self assert: cart size = 1.
 ! !
 
-!TusLibrosTest methodsFor: 'cart tests' stamp: 'E P 6/13/2017 21:40:16'!
-test03WhenANegativeQuantityOfBooksAreAddedAnErrorIsRaisedAndTheProductIsNotAdded
+!TusLibrosTest methodsFor: 'cart tests' stamp: 'F C 6/15/2017 20:03:53'!
+test03WhenAnInvalidQuantityOfBooksAreAddedAnErrorIsRaisedAndTheProductIsNotAdded
 
 	{ -2. 0. 5.6. 4/5. } do: [ :aQuantity |
-				self should: [ cart add: anIsbnInCatalog withQuantity: aQuantity ] 
+				self should: [ cart add: isbn1InCatalog withQuantity: aQuantity ] 
 				 raise: Error - MessageNotUnderstood  
 				 withExceptionDo: [ :anError | 
 					self assert: anError messageText = Cart invalidQuantityErrorMessage.
@@ -31,12 +31,12 @@ test03WhenANegativeQuantityOfBooksAreAddedAnErrorIsRaisedAndTheProductIsNotAdded
 				]	
 			]! !
 
-!TusLibrosTest methodsFor: 'cart tests' stamp: 'E P 6/13/2017 21:36:56'!
+!TusLibrosTest methodsFor: 'cart tests' stamp: 'F C 6/15/2017 19:29:14'!
 test04CartAddsABookWithMoreThanOneCopyCorreclty
 
-	cart add: anIsbnInCatalog withQuantity: 4.
+	cart add: isbn1InCatalog  withQuantity: 4.
 	
-	self assert: (cart quantityFor: anIsbnInCatalog) = 4. 
+	self assert: (cart quantityFor: isbn1InCatalog ) = 4. 
 		! !
 
 !TusLibrosTest methodsFor: 'cart tests' stamp: 'E P 6/13/2017 21:37:17'!
@@ -50,82 +50,149 @@ test05AddingBookThatsNotOnTheCatalogueRaisesError
 		].
 		! !
 
-!TusLibrosTest methodsFor: 'cart tests' stamp: 'E P 6/13/2017 21:52:59'!
+!TusLibrosTest methodsFor: 'cart tests' stamp: 'F C 6/15/2017 19:29:25'!
 test06WhenAskedForContentsACartShouldReturnACollectionWithItsContents
 
 	| aCollection |
 	
-	cart add: anIsbnInCatalog withQuantity: 4.
+	cart add: isbn1InCatalog  withQuantity: 4.
 	aCollection _ cart contents.
 	
 	self assert: aCollection size = 4.
-	self assert: (aCollection select: [ :aBook |  aBook = anIsbnInCatalog ]) size = 4.
+	self assert: (aCollection select: [ :aBook |  aBook = isbn1InCatalog  ]) size = 4.
 	
 	
 	
 		! !
 
 
-!TusLibrosTest methodsFor: 'setup' stamp: 'F C 6/14/2017 23:27:37'!
+!TusLibrosTest methodsFor: 'setup' stamp: 'F C 6/15/2017 19:40:14'!
 setUp
 
-	anIsbnInCatalog _ '123456'.
 	anIsbnNotInCatalog _ '654321'.
 	
-	aCatalog _ {anIsbnInCatalog} asSet. 
-	cart _ Cart withCatalog: aCatalog.
-	emptyCart _ Cart withCatalog: Bag new.
+	priceList _ Dictionary new.
+	isbn1InCatalog _ '123'.
+	isbn2InCatalog _ '456'.
+	isbn3InCatalog _ '789'.
+	priceList at: isbn1InCatalog put: 100.
+	priceList at: isbn2InCatalog put: 250.
+	priceList at: isbn3InCatalog put: 199.
 	
-	aCashier _ Cashier new.
+	aCatalog  _ priceList keys asSet.
+	cart _ Cart withCatalog: aCatalog.
+	aCashier _ Cashier withPriceList: priceList.
 	! !
 
-!TusLibrosTest methodsFor: 'setup' stamp: 'F C 6/15/2017 00:13:04'!
+!TusLibrosTest methodsFor: 'setup' stamp: 'F C 6/15/2017 22:54:25'!
 todo
 
 "
-Cashier conoce una lista de precios (dicc(prod -> precio)).
-La lista de precios podría ser el catalogo (te evita el problema de sincronizar el catalogo con la lista)	
-Tenés que poder hacer aCashier checkout: aCart payWith: aCreditCard
-
-El test no debería chequear si se debito plata de la tarjeta porque la tarjeta es solo un id que representa una cuenta.
-Chequear que no se pueda hacer un checkout con tarjeta vencida. Tiene que poder correr en cualquier fecha. (sin importar que día es hoy.)
 No se va a implementar la parte de comunicacion con el merchant processor. Cashier sabe responder debit: anAmount from: aCreditCard y este mensaje que no haga nada.
 
-Testear lo de credit cart.
-"! !
+
+Test07:
+
+	-Falta el assert de que no se hizo el checkout (de que no esta la operacion en el libro de ventas). Lo que esta faltando es el concepto de libro de ventas. Para assertar que al fallar el checkout, no se anota nada 	en el libro de ventas. El cashier se tiene que crear con un libro de ventas (una coleccion). Las ventas inicialmente pueden ser un total  (Despues cuando necesite mas info se cambia). Esto lo pide el enunciado : 	'El 	sistema debe guardar todas las compras realizadas para luego poder reponer stock, sacar estadísticas de ventas, etc'
+
+	-Falta tambien un assert de  que no se llamo al merchant procesor (esto todavia no vimos como hacerlo) 
 
 
-!TusLibrosTest methodsFor: 'cashier tests' stamp: 'F C 6/14/2017 23:29:27'!
+
+Lista de precios (no va la que hicimos nosotros):
+
+		-Opcion1: el carrito tiene un catalogo que en realidad es la lista de precios y  tanto el cashier como el carrito conocen la lista de precios.
+		.Opcion2: el carrito solo conoce el catalogo/lista de precios y el cashier le pide al carrito que calcule su precio.
+
+		
+Tarjeta:
+		
+		-La tarjeta conoce owner, numero y fecha de expiracion (que no es un date sino un mes de año).
+		
+		-Testear que no se puede hacer checkout con tarjeta vencida (tiene que correr en cualquier fecha):
+			-Para saber si la tarjeta esta vencida:
+				-opcion1: el cashier le pide la fecha de expiracion a la tarjeta y lo verifica comparandola con today. Esto no esta bueno (el cashier se acopla con Date today)
+				-opcion2: La tarjeta responde el mensaje  isExpiredOn: aDate. (asi no acoplo la tarjeta con Date today).
+			Hernan dijo que conviene  crear el cashier con una fecha (diciendole que dia es)  De esta forma no acoplo con Date today para nada. Y en el test entonces controlo la fecha del cashier.
+
+Checkout:
+
+		-Necesito el carrito, la tarjeta, la fecha de hoy, el libro de ventas:
+	
+			-opcion1: checkout: aCart payWith: card onDate: aDate -> esto modela el cajero como persona, osea que atiende varias ventas.
+				-Puede traer problemas de implementacion (por ejemplo que se acarrean resultados entre una y otra venta)
+		
+			-opcion2 (conviene): El cashier lo creo con el carrito, fecha, y tarjeta (y el mensaje es solo checkout) -> esto modela que el cashier es para un carrito. Como que tengo uno distinto para cada venta
+				-Es mas practico para tener las ventas separadas.
+				-Hay que hacer las validaciones en la creacion del cashier (por ejemplo que la tarjeta no puede estar vencida, que el carrito no este vacio, etc) en vez de hacerlas al hacer la operacion checkout.
+			
+		-Puede devolver por ahora el total y despues vemos si necesita mas info.
+		-Para la plata basta con numeros. No hace falta usar Measures
+
+	
+Unica clase de test vs clase de test por clase:
+		-SI las hacemos separadas el problema es que comparten cosas del setup. 
+		Para esto hay que hacer un factory que sirva para proveer los objetos para todas la clases (y no hacer lo mismo en todos los setups).
+
+	
+Merchant processor(MP):
+
+		
+		-Necesito una interfaz (un traductor) para comunicar al cajero con el MP.
+		
+		cashier ------------------- | A | B | ------------- MP
+								 (interfaz)
+		
+		
+		-La interfaz tiene dos caras (para un lado habla un idioma y para el otro lado el otro idioma). Estas caras (A y B) las podemos pensar como dos objetos.
+		La cara interna (A) seria la que habla con el cashier (mundo objetos). La externa (B) es la que habla con el MP (rest, http).
+
+		-Usar el MP para los tests tiene muchos problemas (no solo por el costo). Por ende hay que simularlo (mock)
+
+		-Hay que decidir como simular la cara interna para los tests. No hay que implementar todavia ninguna de las dos caras.
+		
+		-Para testear el cajero  conviene mockear la cara interna, dado que es lo mas rapido y logico para testear cashier. El test tiene que hacer el steup del simulador (ej: cuando te pidan hacer la operacion con una tarjeta devolve que esta vencida). La respuesta de la cara interna es OK o excepcion. No es el 0|OK, o 1|.... ya que esto lo traduce la cara interna (hacia el mundo de objetos)
+		
+		-El cajero va a necesitar el MP al crearse		
+		
+		-Cuando implemente realmente la cara interna, ahi hacemos los tests y simulamos la cara externa.
+		
+		-Tests. checkout con tarjeta vencida, checkout con tarjeta sin credito, checkout con tarjeta que esta todo bien, 
+		
+"
+	! !
+
+
+!TusLibrosTest methodsFor: 'cashier tests' stamp: 'F C 6/15/2017 22:32:19'!
 test07CannotCheckoutAnEmptyCart
 
 
-	self should: [ aCashier checkout: emptyCart ]  
+	self should: [ aCashier checkout: cart payWith: '45638291029382765' ]  
 	raise: Error - MessageNotUnderstood 
-	withExceptionDo: [ :anError | self assert: anError messageText = 'Cannot checkout an empty cart.'].
+	withExceptionDo: [ :anError | self assert: anError messageText = Cashier cannotCheckoutAnEmptyCartErrorDescription].
 ! !
 
-!TusLibrosTest methodsFor: 'cashier tests' stamp: 'F C 6/15/2017 00:12:16'!
+!TusLibrosTest methodsFor: 'cashier tests' stamp: 'F C 6/15/2017 22:33:07'!
 test08CashierCalculatesTotalPriceOfCartCorrectly
 
-	| book1 book2 book3 priceForBook1 priceForBook2 priceForBook3 totalPrice |
-	priceList _ Dictionary new.
-	book1 _ '1'.
-	book2 _ '2'.
-	book3 _ '3'.
-	priceForBook1 _ 2.
-	priceForBook2 _ 5.8.
-	priceForBook3 _ 3/8.
-	priceList at: book1 put: priceForBook1.
-	priceList at: book2 put: priceForBook2.
-	priceList at: book3 put: priceForBook3.
-	cart _ Cart withCatalog: priceList keys asSet.
-	cart add: book1 withQuantity: 1.
-	cart add: book2 withQuantity: 2.
-	cart add: book3 withQuantity: 3.
+	| priceForBook1 priceForBook2 priceForBook3 totalPrice |
+	
+	cart add: isbn1InCatalog withQuantity: 1.
+	cart add: isbn2InCatalog withQuantity: 2.
+	cart add: isbn3InCatalog withQuantity: 3.
+	
+	priceForBook1 _ priceList at: isbn1InCatalog.
+	priceForBook2 _ priceList at: isbn2InCatalog.
+	priceForBook3 _ priceList at: isbn3InCatalog.
 	
 	totalPrice _ priceForBook1 + (2*priceForBook2) + (3*priceForBook3).
 	
-	self assert: (aCashier totalPriceOf: cart) = totalPrice.! !
+	self assert: (aCashier totalPriceOf: cart) = totalPrice.
+	
+	
+	
+	
+	! !
 
 
 !classDefinition: #Cart category: #'TusLibros-Solution'!
@@ -205,20 +272,17 @@ Object subclass: #Cashier
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
 
-!Cashier methodsFor: 'checkout' stamp: 'F C 6/14/2017 23:29:23'!
-checkout: aCart 
+!Cashier methodsFor: 'checkout' stamp: 'F C 6/15/2017 20:01:54'!
+checkout: aCart payWith: aCreditCard
 
 
-	aCart isEmpty ifTrue: [ self error: 'Cannot checkout an empty cart.' ].! !
+	aCart isEmpty ifTrue: [ self error: self class cannotCheckoutAnEmptyCartErrorDescription].! !
 
 
-!Cashier methodsFor: 'macpal' stamp: 'F C 6/15/2017 00:09:24'!
-initialize
+!Cashier methodsFor: 'macpal' stamp: 'F C 6/15/2017 19:22:36'!
+initializeWithPriceList: aPriceList
 
-	priceList _ Dictionary new.
-	priceList at: '1' put: 2.
-	priceList at: '2' put: 5.8.
-	priceList at: '3' put: 3/8.! !
+	priceList _ aPriceList.! !
 
 !Cashier methodsFor: 'macpal' stamp: 'F C 6/15/2017 00:10:42'!
 totalPriceOf: aCart 
@@ -229,3 +293,20 @@ totalPriceOf: aCart
 		totalPrice _ totalPrice + (priceList at: aProduct).	
 	].
 	^totalPrice.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Cashier class' category: #'TusLibros-Solution'!
+Cashier class
+	instanceVariableNames: ''!
+
+!Cashier class methodsFor: 'as yet unclassified' stamp: 'F C 6/15/2017 19:22:25'!
+withPriceList: aPriceList
+
+	^self new initializeWithPriceList: aPriceList.! !
+
+
+!Cashier class methodsFor: 'error descriptions' stamp: 'F C 6/15/2017 20:01:35'!
+cannotCheckoutAnEmptyCartErrorDescription
+
+	^'Cannot checkout an empty cart.'! !
