@@ -1,6 +1,6 @@
 !classDefinition: #TusLibrosTest category: #'TusLibros-Solution'!
 TestCase subclass: #TusLibrosTest
-	instanceVariableNames: 'cart aCatalog anIsbnNotInCatalog aCashier emptyCart priceList isbn1InCatalog isbn2InCatalog isbn3InCatalog'
+	instanceVariableNames: 'cart aCatalog anIsbnNotInCatalog aCashier emptyCart priceList isbn1InCatalog isbn2InCatalog isbn3InCatalog aCreditCard aSalesBook anExpiredCreditCard'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
@@ -66,7 +66,30 @@ test06WhenAskedForContentsACartShouldReturnACollectionWithItsContents
 		! !
 
 
-!TusLibrosTest methodsFor: 'setup' stamp: 'F C 6/15/2017 19:40:14'!
+!TusLibrosTest methodsFor: 'setup' stamp: 'E P 6/18/2017 18:35:55'!
+done
+
+"
+Lista de precios (no va la que hicimos nosotros):
+
+		-Opcion1: el carrito tiene un catalogo que en realidad es la lista de precios y  tanto el cashier como el carrito conocen la lista de precios.
+		.Opcion2: el carrito solo conoce el catalogo/lista de precios y el cashier le pide al carrito que calcule su precio.
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+"! !
+
+!TusLibrosTest methodsFor: 'setup' stamp: 'E P 6/18/2017 20:45:14'!
 setUp
 
 	anIsbnNotInCatalog _ '654321'.
@@ -79,30 +102,28 @@ setUp
 	priceList at: isbn2InCatalog put: 250.
 	priceList at: isbn3InCatalog put: 199.
 	
-	aCatalog  _ priceList keys asSet.
-	cart _ Cart withCatalog: aCatalog.
-	aCashier _ Cashier withPriceList: priceList.
+	"cambiar por mes de año, hay que crear la clase"
+	aCreditCard  _ CreditCard withOwner: 'pepe' number: '4563728938456372' andExpiration: (Date tomorrow).
+	anExpiredCreditCard _ CreditCard withOwner: 'pepe' number: '4563728938456372' andExpiration: (Date year: 2016 month: 12  day: 1).
+	
+	aSalesBook _ Set new.
+	
+	cart _ Cart withCatalog: priceList.
 	! !
 
-!TusLibrosTest methodsFor: 'setup' stamp: 'F C 6/15/2017 22:54:25'!
+!TusLibrosTest methodsFor: 'setup' stamp: 'E P 6/18/2017 21:17:18'!
 todo
 
 "
-No se va a implementar la parte de comunicacion con el merchant processor. Cashier sabe responder debit: anAmount from: aCreditCard y este mensaje que no haga nada.
 
+
+
+No se va a implementar la parte de comunicacion con el merchant processor. Cashier sabe responder debit: anAmount from: aCreditCard y este mensaje que no haga nada.
 
 Test07:
 
-	-Falta el assert de que no se hizo el checkout (de que no esta la operacion en el libro de ventas). Lo que esta faltando es el concepto de libro de ventas. Para assertar que al fallar el checkout, no se anota nada 	en el libro de ventas. El cashier se tiene que crear con un libro de ventas (una coleccion). Las ventas inicialmente pueden ser un total  (Despues cuando necesite mas info se cambia). Esto lo pide el enunciado : 	'El 	sistema debe guardar todas las compras realizadas para luego poder reponer stock, sacar estadísticas de ventas, etc'
 
 	-Falta tambien un assert de  que no se llamo al merchant procesor (esto todavia no vimos como hacerlo) 
-
-
-
-Lista de precios (no va la que hicimos nosotros):
-
-		-Opcion1: el carrito tiene un catalogo que en realidad es la lista de precios y  tanto el cashier como el carrito conocen la lista de precios.
-		.Opcion2: el carrito solo conoce el catalogo/lista de precios y el cashier le pide al carrito que calcule su precio.
 
 		
 Tarjeta:
@@ -116,6 +137,8 @@ Tarjeta:
 			Hernan dijo que conviene  crear el cashier con una fecha (diciendole que dia es)  De esta forma no acoplo con Date today para nada. Y en el test entonces controlo la fecha del cashier.
 
 Checkout:
+
+		- DUDA: fijarse si es necesario que cada cashier conozca su propio libro de ventas o que haya uno sólo y se le pase como colaborador al crear el cashier.
 
 		-Necesito el carrito, la tarjeta, la fecha de hoy, el libro de ventas:
 	
@@ -163,19 +186,23 @@ Merchant processor(MP):
 	! !
 
 
-!TusLibrosTest methodsFor: 'cashier tests' stamp: 'F C 6/15/2017 22:32:19'!
-test07CannotCheckoutAnEmptyCart
+!TusLibrosTest methodsFor: 'cashier tests' stamp: 'E P 6/18/2017 20:09:00'!
+test07CannotCreateCashierWithAnEmptyCart
 
 
-	self should: [ aCashier checkout: cart payWith: '45638291029382765' ]  
+	self should: [ Cashier withSalesBook: aSalesBook Cart: cart creditCard: aCreditCard  andPriceList: priceList ]  
 	raise: Error - MessageNotUnderstood 
-	withExceptionDo: [ :anError | self assert: anError messageText = Cashier cannotCheckoutAnEmptyCartErrorDescription].
+	withExceptionDo: [ :anError | 
+		self assert: anError messageText = Cashier cannotCreateCashierWithAnEmptyCartErrorDescription.	  
+		self assert: aSalesBook isEmpty.
+	].
+
 ! !
 
-!TusLibrosTest methodsFor: 'cashier tests' stamp: 'F C 6/15/2017 22:33:07'!
-test08CashierCalculatesTotalPriceOfCartCorrectly
+!TusLibrosTest methodsFor: 'cashier tests' stamp: 'E P 6/18/2017 20:01:31'!
+test08WhenCheckoutIsMadeTheSaleIsRegisteredInTheSalesBook
 
-	| priceForBook1 priceForBook2 priceForBook3 totalPrice |
+	| priceForBook1 priceForBook2 priceForBook3 totalPrice checkoutResult |
 	
 	cart add: isbn1InCatalog withQuantity: 1.
 	cart add: isbn2InCatalog withQuantity: 2.
@@ -187,12 +214,27 @@ test08CashierCalculatesTotalPriceOfCartCorrectly
 	
 	totalPrice _ priceForBook1 + (2*priceForBook2) + (3*priceForBook3).
 	
-	self assert: (aCashier totalPriceOf: cart) = totalPrice.
+	aCashier _ Cashier withSalesBook: aSalesBook Cart: cart creditCard: aCreditCard andPriceList: priceList. 
+	checkoutResult _ aCashier checkout.
 	
+	self assert: (aCashier salesBook includes: totalPrice).
+	self assert: aCashier salesBook size = 1.
+	self assert: totalPrice = checkoutResult.
 	
-	
-	
-	! !
+! !
+
+!TusLibrosTest methodsFor: 'cashier tests' stamp: 'E P 6/18/2017 20:47:34'!
+test09CannotCreateCashierWithAnExpiredCreditCard
+
+	cart add: isbn1InCatalog.
+	self should: [ Cashier withSalesBook: aSalesBook Cart: cart creditCard: anExpiredCreditCard  andPriceList: priceList ]  
+	raise: Error - MessageNotUnderstood 
+	withExceptionDo: [ :anError | 
+		self assert: anError messageText = Cashier cannotCreateCashierWithAnExpiredCreditCardErrorDescription.	  
+		self assert: aSalesBook isEmpty.
+	].
+
+! !
 
 
 !classDefinition: #Cart category: #'TusLibros-Solution'!
@@ -213,15 +255,14 @@ add: aBook
 	
 	self add: aBook withQuantity: 1.! !
 
-!Cart methodsFor: 'adding' stamp: 'E P 6/13/2017 21:45:50'!
+!Cart methodsFor: 'adding' stamp: 'E P 6/18/2017 18:34:09'!
 add: aBook withQuantity: aNumber
 	
 	((aNumber isKindOf: Integer) and: [aNumber strictlyPositive]) ifFalse: [ self error: self class invalidQuantityErrorMessage ].
-	(catalog includes: aBook) ifFalse: [ self error: 'Cannot add a product that is not part of the catalog'. ].
+	(catalog includesKey: aBook) ifFalse: [ self error: 'Cannot add a product that is not part of the catalog'. ].
 	container add: aBook withOccurrences: aNumber.
-	
-	
-	! !
+
+Dictionary! !
 
 
 !Cart methodsFor: 'initialization' stamp: 'E P 6/13/2017 21:32:47'!
@@ -240,6 +281,17 @@ quantityFor: aBook
 size
 
 	^container size.! !
+
+!Cart methodsFor: 'accessing' stamp: 'E P 6/18/2017 19:30:13'!
+totalPrice 
+	
+	| totalPrice |
+	
+	totalPrice _ 0.
+	container do: [ :aProduct | 
+		totalPrice _ totalPrice + (catalog at: aProduct).	
+	].
+	^totalPrice.! !
 
 
 !Cart methodsFor: 'listing' stamp: 'E P 6/13/2017 21:54:36'!
@@ -267,32 +319,40 @@ invalidQuantityErrorMessage
 
 !classDefinition: #Cashier category: #'TusLibros-Solution'!
 Object subclass: #Cashier
-	instanceVariableNames: 'priceList'
+	instanceVariableNames: 'priceList salesBook cart creditCard'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
 
-!Cashier methodsFor: 'checkout' stamp: 'F C 6/15/2017 20:01:54'!
-checkout: aCart payWith: aCreditCard
+!Cashier methodsFor: 'checkout' stamp: 'E P 6/18/2017 21:23:19'!
+checkout
+
+	| total |
+	
+	total _ cart totalPrice.
+	self debit: total from: creditCard.
+	salesBook add: total.
+	^total.! !
 
 
-	aCart isEmpty ifTrue: [ self error: self class cannotCheckoutAnEmptyCartErrorDescription].! !
+!Cashier methodsFor: 'accessing' stamp: 'E P 6/18/2017 18:54:47'!
+salesBook
+	
+	^salesBook.! !
 
 
-!Cashier methodsFor: 'macpal' stamp: 'F C 6/15/2017 19:22:36'!
-initializeWithPriceList: aPriceList
+!Cashier methodsFor: 'initialization' stamp: 'E P 6/18/2017 20:01:06'!
+initializeWithSalesBook: aSalesBook Cart: aCart creditCart: aCreditCard andPriceList: aPriceList 
 
-	priceList _ aPriceList.! !
+	salesBook _ aSalesBook.
+	cart _ aCart.
+	creditCard _ aCreditCard.
+	priceList _ aPriceList.
+	! !
 
-!Cashier methodsFor: 'macpal' stamp: 'F C 6/15/2017 00:10:42'!
-totalPriceOf: aCart 
 
-	| totalPrice |
-	totalPrice _ 0.
-	aCart contents do: [ :aProduct | 
-		totalPrice _ totalPrice + (priceList at: aProduct).	
-	].
-	^totalPrice.! !
+!Cashier methodsFor: 'macpal' stamp: 'E P 6/18/2017 21:24:35'!
+debit: anAmount from: aCreditCard! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -300,13 +360,55 @@ totalPriceOf: aCart
 Cashier class
 	instanceVariableNames: ''!
 
-!Cashier class methodsFor: 'as yet unclassified' stamp: 'F C 6/15/2017 19:22:25'!
-withPriceList: aPriceList
+!Cashier class methodsFor: 'as yet unclassified' stamp: 'E P 6/18/2017 20:28:27'!
+withSalesBook: aSalesBook Cart: aCart creditCard: aCreditCard andPriceList: aPriceList
 
-	^self new initializeWithPriceList: aPriceList.! !
+	aCart isEmpty ifTrue: [ self error: self cannotCreateCashierWithAnEmptyCartErrorDescription ].
+	(aCreditCard isExpiredOn: Date today) ifTrue: [ self error: self cannotCreateCashierWithAnExpiredCreditCardErrorDescription ]."deberia ser mes de año?"
+	^self new initializeWithSalesBook: aSalesBook Cart: aCart creditCart: aCreditCard andPriceList: aPriceList.! !
 
 
-!Cashier class methodsFor: 'error descriptions' stamp: 'F C 6/15/2017 20:01:35'!
-cannotCheckoutAnEmptyCartErrorDescription
+!Cashier class methodsFor: 'error descriptions' stamp: 'E P 6/18/2017 19:40:15'!
+cannotCreateCashierWithAnEmptyCartErrorDescription
 
-	^'Cannot checkout an empty cart.'! !
+	^'Cannot create cashier with an empty cart.'! !
+
+!Cashier class methodsFor: 'error descriptions' stamp: 'E P 6/18/2017 20:25:46'!
+cannotCreateCashierWithAnExpiredCreditCardErrorDescription
+
+	^'Cannot create cashier with an expired credit card.'.! !
+
+
+!classDefinition: #CreditCard category: #'TusLibros-Solution'!
+Object subclass: #CreditCard
+	instanceVariableNames: 'owner number dateOfExpiration'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros-Solution'!
+
+!CreditCard methodsFor: 'initialization' stamp: 'E P 6/18/2017 20:35:05'!
+initializeWithOwner: anOwner number: aString andExpiration: aDate 
+
+	owner _ anOwner.
+	number _ aString.
+	dateOfExpiration _ aDate.! !
+
+!CreditCard methodsFor: 'initialization' stamp: 'E P 6/18/2017 20:38:44'!
+isExpiredOn: aDate
+
+	^dateOfExpiration < aDate.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'CreditCard class' category: #'TusLibros-Solution'!
+CreditCard class
+	instanceVariableNames: ''!
+
+!CreditCard class methodsFor: 'instance creation' stamp: 'E P 6/18/2017 20:35:19'!
+withOwner: anOwner number: aString andExpiration: aDate 
+
+	^self new initializeWithOwner: anOwner number: aString andExpiration: aDate.
+
+	
+
+	! !
