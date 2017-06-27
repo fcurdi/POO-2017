@@ -112,110 +112,6 @@ setUp
 
 	! !
 
-!TusLibrosTest methodsFor: 'setup' stamp: 'E P 6/22/2017 21:17:18'!
-todo
-
-"
-Test07:
-
-	-Falta tambien un assert de  que no se llamo al merchant procesor (esto todavia no vimos como hacerlo) 
-
-
-Checkout:
-
-		- DUDA: fijarse si es necesario que cada cashier conozca su propio libro de ventas o que haya uno sólo y se le pase como colaborador al crear el cashier.
-
-		-Necesito el carrito, la tarjeta, la fecha de hoy, el libro de ventas:
-	
-			-opcion1: checkout: aCart payWith: card onDate: aDate -> esto modela el cajero como persona, osea que atiende varias ventas.
-				-Puede traer problemas de implementacion (por ejemplo que se acarrean resultados entre una y otra venta)
-		
-			-opcion2 (conviene): El cashier lo creo con el carrito, fecha, y tarjeta (y el mensaje es solo checkout) -> esto modela que el cashier es para un carrito. Como que tengo uno distinto para cada venta
-				-Es mas practico para tener las ventas separadas.
-				-Hay que hacer las validaciones en la creacion del cashier (por ejemplo que la tarjeta no puede estar vencida, que el carrito no este vacio, etc) en vez de hacerlas al hacer la operacion checkout.
-			
-		-Puede devolver por ahora el total y despues vemos si necesita mas info.
-		-Para la plata basta con numeros. No hace falta usar Measures
-
-	
-Unica clase de test vs clase de test por clase:
-		-SI las hacemos separadas el problema es que comparten cosas del setup. 
-		Para esto hay que hacer un factory que sirva para proveer los objetos para todas la clases (y no hacer lo mismo en todos los setups).
-
-	
-Merchant processor(MP):
-
-		
-		-Necesito una interfaz (un traductor) para comunicar al cajero con el MP.
-		
-		cashier ------------------- | A | B | ------------- MP
-								 (interfaz)
-		
-		
-		-La interfaz tiene dos caras (para un lado habla un idioma y para el otro lado el otro idioma). Estas caras (A y B) las podemos pensar como dos objetos.
-		La cara interna (A) seria la que habla con el cashier (mundo objetos). La externa (B) es la que habla con el MP (rest, http).
-
-		-Usar el MP para los tests tiene muchos problemas (no solo por el costo). Por ende hay que simularlo (mock)
-
-		-Hay que decidir como simular la cara interna para los tests. No hay que implementar todavia ninguna de las dos caras.
-		
-		-Para testear el cajero  conviene mockear la cara interna, dado que es lo mas rapido y logico para testear cashier. El test tiene que hacer el steup del simulador (ej: cuando te pidan hacer la operacion con una tarjeta devolve que esta vencida). La respuesta de la cara interna es OK o excepcion. No es el 0|OK, o 1|.... ya que esto lo traduce la cara interna (hacia el mundo de objetos)
-		
-		-El cajero va a necesitar el MP al crearse		
-		
-		-Cuando implemente realmente la cara interna, ahi hacemos los tests y simulamos la cara externa.
-		
-		-Tests. checkout con tarjeta vencida, checkout con tarjeta sin credito, checkout con tarjeta que esta todo bien, 
-		
-"
-	
-
-	
-	
-	
-"
-
-Para el simulador:
-	
-	Tiene que haber una clase padre que defina como se comportan el merchant procesor de verdad y el simulador.
-	Que define que se debe implementar el mensaje     debit: from:
-	La excepcion la tiene que levantar el simulador, no el cajero. 
-	Se puede setear el comportamiento del simulador con closures que levanten excepciones con diferentes mensajes. (pluggable merchant processor simulator).
-		(clase que se crea con un closure que es el comportamiento y que sabe responder debit: from: que lo que hace es llamar al closure).
-	Para saber si se llamó o no al MP, se puede usar un contador de transacciones. (se chequea que siga en 0 el contador).
-	Los mensajes de error deben estar definidas en la clase abstracta del MP.
-	
-"
-
-
-"
-Queda hacer la interfaz de entrada. Responde a los request del mundo externo.
-El test tiene que hablar con la cara interna de la de la interfaz --> estas hablando el mismo lenguaje. La cara externa tiene otro protocolo.
-
-Nuestra cara intera define mensajes como:
-	-createCartFor: anId withPassword: ...
-	-addToCart:
-	-checkout 
-	(todos los mensajes que estan definidos en el protocolo del enunciado y sólo esos, ninguno más). Lo que tenés que testear es la interfaz, no el 'modelo'. Nuestro 'modelo' es la interfaz.
-	
-	
-	test de createCart --> creo un carrito nuevo y hago un /listCart. Assertas que devuelve una coleccion vacia. Ahi chequeas que el carrito no es invalido, porque el listCart no devuelve un error.
-	No se puede romper el encapsulamiento de la interfaz.
-	
-	test01 --> invalid id.
-	test02 --> invalid password
-	test03 --> isbn externo a la editorial
-	test04 --> isbn de la editorial
-	test fundamental 05--> carrito no puede ser usado despues de 30 minutos.
-	
-	Hay que 'engañar' al objeto para hacerle creer que pasaron 30 minutos.
-	Tienen que haber minimamente 5 tests.
-	
-	Pares de id y password se guardan en un diccionario.
-
-"	
-	! !
-
 
 !TusLibrosTest methodsFor: 'cashier tests' stamp: 'E P 6/25/2017 16:05:15'!
 test07CannotCreateCashierWithAnEmptyCart
@@ -294,16 +190,15 @@ test12WhenCheckingOutWithExpiredCreditCardnAnErrorIsRaised
 	self assertThatWhenDoingCheckoutMerchantProcessorRaises: MerchantProcessor expiredCreditCardErrorDescription.! !
 
 
-!TusLibrosTest methodsFor: 'rest Interface tests' stamp: 'E P 6/26/2017 00:47:36'!
+!TusLibrosTest methodsFor: 'rest Interface tests' stamp: 'E P 6/27/2017 18:04:54'!
 test14WhenPassedInvalidClientIdOrPasswordCartIsNotCreatedAndErrorIsRaised
 	
 	self assertThat:  [ restInterface createCartWithClientId: invalidClientId andPassword: password ]
 		 raisesErrorMessage: TusLibrosInterface invalidClientIdErrorDescription.
-		"	self assert: restInterface carts size = 0."
+
 	
 	self assertThat: [ restInterface createCartWithClientId: clientId andPassword: password, 'wrong' ] 
 		 raisesErrorMessage: TusLibrosInterface invalidPasswordErrorDescription.
-		"	self assert: restInterface carts size = 0."
 ! !
 
 !TusLibrosTest methodsFor: 'rest Interface tests' stamp: 'E P 6/26/2017 00:49:32'!
@@ -479,6 +374,7 @@ assertThatWhenDoingCheckoutMerchantProcessorRaises: anErrorMessage
 		raise: Error - MessageNotUnderstood 
 		withExceptionDo: [ :anError | self assert: anError messageText = anErrorMessage].
 ! !
+
 
 
 !classDefinition: #Cart category: #'TusLibros-Solution'!
